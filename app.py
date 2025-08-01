@@ -69,3 +69,12 @@ if __name__ == "__main__":
     finally:
         # Close the database connection when the application terminates
         password_db.close()
+
+app = Flask(__name__)
+
+@app.route("/history")
+def history():
+    return render_template("history.html")
+
+if __name__ == "__main__":
+    app.run(debug=True)
