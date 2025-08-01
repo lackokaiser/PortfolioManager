@@ -4,7 +4,7 @@
     .then(data => console.log('GET response:', data));
 
 //Helper function to create a table row with cells
-// fucntion createRow(cells) {
+// function createRow(cells) {
 //  const tr = document.creatElement('tr)
 //   cells.forEach(cell => {
 //     const td = document.createElement('td); 
