@@ -11,13 +11,21 @@ class DatabaseAccess:
         )
         self.yFinance = financeInstance
     
+    def _sanitize_value(self, value: str):
+        """_summary_: Validates and sanitizes the value against sql injection
+        Args:
+            value (_type_): _description_: The string value
+        """
+        
+        return ''.join(c for c in value if c.isdecimal() or c.isalpha())
+    
     def get_owned_stock(self, ticker = None):
         curs = self.dbConnection.cursor()
         
         if ticker == None:
             curs.execute("select * from stockdemo order by ticker")
         else:
-            curs.execute(f"select * from stockdemo where ticker = '{ticker}'")
+            curs.execute(f"select * from stockdemo where ticker = '{self._sanitize_value(ticker)}'")
         fetch = curs.fetchall()
         curs.close()
         
@@ -51,7 +59,7 @@ class DatabaseAccess:
     def buy_stock(self, ticker: str, amount: float):
         curs = self.dbConnection.cursor()
         
-        curs.execute(f"insert into stockdemo (ticker, stock_name, stock_value, quantity) values ('{ticker}', '', {self._get_value(ticker)}, {amount})")
+        curs.execute(f"insert into stockdemo (ticker, stock_name, stock_value, quantity) values ('{self._sanitize_value(ticker)}', '', {self._get_value(ticker)}, {amount})")
         self.dbConnection.commit()
         curs.close()
     
@@ -61,7 +69,7 @@ class DatabaseAccess:
     def get_stock_pnl(self, ticker):
         curs = self.dbConnection.cursor()
         
-        curs.execute(f"select ticker, sum(quantity), sum(stock_value * quantity) from stockdemo where ticker = '{ticker}' group by ticker")
+        curs.execute(f"select ticker, sum(quantity), sum(stock_value * quantity) from stockdemo where ticker = '{self._sanitize_value(ticker)}' group by ticker")
         
         data = curs.fetchall()
         curs.close()
