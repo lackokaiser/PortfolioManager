@@ -13,6 +13,8 @@ def get_history_data(ticker, start, end, interval):
     )
     return data.reset_index().to_dict(orient="records")
 
+# def get_point
+
 @app.route("/api/v1/stock/<ticker>/history")
 def api_history(ticker):
     today = datetime.today()

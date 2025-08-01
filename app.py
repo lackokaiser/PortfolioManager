@@ -16,6 +16,9 @@ def home():
 def about():
     return render_template("portfolio_view.html")
 
+@app.route("/history")
+def history():
+    return render_template("history.html")
 
 # Global database connection for the service lifetime
 def dbconn():
@@ -70,11 +73,3 @@ if __name__ == "__main__":
         # Close the database connection when the application terminates
         password_db.close()
 
-app = Flask(__name__)
-
-@app.route("/history")
-def history():
-    return render_template("history.html")
-
-if __name__ == "__main__":
-    app.run(debug=True)

@@ -6,6 +6,26 @@ Portfolio Management
 {% endblock %}
 {% block content %}
 <div class="container">
+    <section class="grid" id="stock-picker">
+        <h1>Stock Picker</h1>
+            <input type="search" id="stock-search" name="q" />
+            <button class="styled" id="search-button" type="button" onclick="searchStocks()">Search</button>
+            <div id="search-results">
+                <table id="search-results-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Ticker</th>
+                            <th>Price</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="search-results-body">
+                        <!-- Search results will be populated here -->
+                    </tbody>
+            </div>
+    </section>
+    <section class="grid" id="portfolio-section">
     <h1>My Portfolio</h1>
     <table id="portfolio-table" class="portfolio-table">
         <thead>
@@ -14,11 +34,14 @@ Portfolio Management
                 <th>Ticker</th>
                 <th>Value</th>
                 <th>Quantity</th>
+                <th></th>                
             </tr>
         </thead>
         <tbody id="portfolio-table-body">
             <!-- Data will be loaded here by JavaScript -->
         </tbody>
     </table>
+</section>
+
 </div>
 {% endblock %}
