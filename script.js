@@ -30,5 +30,5 @@
 // const rows = creatRow([
 //   stock.symbol, 
 //   stock.shares, 
-//   '$${stock.avg_byy_price.}
+//   '$${stock.avg_buy_price.}
 //])})
