@@ -1,0 +1,7 @@
+flask
+numpy
+pandas
+requests
+flask-restful
+yfinance
+mysql-connector-python
