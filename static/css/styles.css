@@ -1,0 +1,151 @@
+/* Container styling */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header styling */
+header {
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 10px 0;
+}
+
+.header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.logo-container {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 60px;
+    width: auto;
+    margin-right: 15px;
+}
+
+.logo-container h1 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 24px;
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+nav ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+nav li {
+    margin-left: 25px;
+}
+
+nav a {
+    text-decoration: none;
+    color: #2c3e50;
+    font-weight: 500;
+    font-size: 16px;
+    transition: color 0.3s ease;
+}
+
+nav a:hover {
+    color: #3498db;
+}
+
+/* Table styling */
+.table-responsive {
+    overflow-x: auto;
+    margin: 25px 0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.portfolio-table {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 0.9em;
+    font-family: sans-serif;
+    min-width: 400px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.portfolio-table thead {
+    background-color: #009879;
+    color: #ffffff;
+    text-align: left;
+}
+
+.portfolio-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.portfolio-table td {
+    padding: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.portfolio-table tbody tr:hover {
+    border-bottom: 1px solid #dddddd;
+    background-color: #f3f3f3;
+    transition: background-color 0.3s ease;
+}
+
+.portfolio-table tbody tr:last-child td {
+    border-bottom: 2px solid #009879;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .header-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    nav ul {
+        margin-top: 15px;
+    }
+    
+    nav li {
+        margin: 0 10px;
+    }
+
+    .portfolio-table th,
+    .portfolio-table td {
+        padding: 10px;
+    }
+}
+
+/* Page header styling */
+h1 {
+    color: #2c3e50;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    font-size: 28px;
+}
+
+/* Add these to your CSS file */
+.positive-value {
+    color: #27ae60;
+    font-weight: bold;
+}
+
+.negative-value {
+    color: #e74c3c;
+    font-weight: bold;
+}

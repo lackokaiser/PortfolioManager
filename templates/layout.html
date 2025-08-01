@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Portfolio Manager{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src={% block javascriptfile %}{% endblock %}></script>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/stockoverflownew.png') }}" alt="Stock Overflow Logo" class="logo" style="width: 150px; height: auto;float:left;">
+                <h1>Stock Overflow</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('home') }}">Home</a></li>
+                    <li><a href="/portfolio">My Portfolio</a></li>
+                    <li><a href="/home">About</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main>
+        {% block content %}
+        <!-- Content will be injected here -->
+        {% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2025 Portfolio Manager. All rights reserved.</p>
+    </footer>
+</body>
+</html>
