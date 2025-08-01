@@ -30,5 +30,22 @@
 // const rows = creatRow([
 //   stock.symbol, 
 //   stock.shares, 
-//   '$${stock.avg_buy_price.}
-//])})
+//   '$${stock.avg_buy_price.toFixed(2)}',
+//   '$${stock.current_price.toFixed(2)}',
+//   '$${gainLoss}'
+//]);
+// tbody.appendChild(row);
+//});
+// } catch (error) {
+// console.error('Error loading portfolo;', error);
+//}
+//}
+
+// fetch and display market data
+// async function loadMarketData() {
+// try
+//   const response = await fetch('http://localhost:5000/api/market')
+//   if (!response.ok) throw new Error('Failed to fetch market data')
+//   const marketData = await response.json();
+//   const tbody = document.querySelector(')
+//}
