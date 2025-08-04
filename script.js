@@ -74,76 +74,45 @@ async function loadPortfolio() {
 
 // function to load yahoo finance live market data
 
-const apiKey = '5fb181b2d1mshd76ac988484d044p1726b1jsn6c348d04422d';
-const apiHost = 'yh-finance.p.rapidapi.com';
 
-async function fetchQuote(symbol = "AAPL") {
-    const url = 'https://${host}/market/v2/get-quotes?symbols=${e'
+
+async function fetchStockData() {
+    const options = {
+        method: 'GET',
+        headers: {
+            'X-RapidAPI-Key': '5fb181b2d1mshd76ac988484d044p1726b1jsn6c348d04422d',
+            'X-RapidAPI-Host': 'yh-finance.p.rapidapi.com',
+        }
+    };
+
     try {
-        const res = await fetch(url, {
-            method: "GET",
-            headers: {
-                "x-RapidAPI-Host": apiHost,
-                "X=RapidApi-Key": key
-            }
-        });
+        const response = await fetch('https://yhfinance.p.rapidapi.com/stock/v3/get-summary?symbol=AAPL', options);
+        const data = await response.json();
 
-        if (!res.ok) {
-            throw new Error('API error: ${res.status ${res.statusText}');
+        const price = data.price.regularMarketPrice.raw;
+        const currency = data.price.currency;
+        const name = data.price.longName;
 
+        document.getElementById("stockData").innerHTML = `
+        <h2>${name} (AAPL)</h2>
+        <p>Price: ${price} ${currency}</p>
+        `;
+
+        } catch (error) {
+            document.getElementById("stockData").textContent = "Error loading data";
+            console.error(error);
         }
-
-        const data = await res.json();
-        const q = data.quoteResponse?.result?.[0];
-
-        if (!q) {
-            return 'No data for "${symbol}"';
-        }
-
-        const {symbol: sym, regularMarketPrice, regularMarketChange, regularMarketChangePercent} = q;
-        return '${sym}: $${regularMarketPrice} (${regularMarketChange => 0 ? "+" : ""}${regularMarketChange.toFixed(2)}, ${regularMarketChangePercent.toFixed(2)}%)';
-
-    } catch (err) {
-        console.error(err);
-        return "Error loading data";
-    }
+    
 }
-
-document.getElementById('btn').onclick = async () => {
-    const symbol = document.getElementById("symbol").value.trim().toUpperCase();
-    document.getElementById("quotes").textContent = "Loading...";
-    const text = await fetchQuote(symbol || "AAPL");
-    document.getElementById("quote").textContent = text;
-};
-
-fetchQuote("AAPL").then(txt => document.getElementById("quote").textContent = txt);
+getStockData();
 
 
 
 
 
-fetch(url, { headers })
-.then(response => {
-    if(!response.ok) throw new Error("Network response was not ok");
-    return response.json();
-})
-.then(data => {
-    const priceInfo = data.quoteSummary?.result?.[0]?.price;
-    if (priceInfo) {
-        const price = priceInfo.regularMarketPrice?.raw;
-        const change = priceInfo.regularMarketChange?.raw;
-        const percent = priceInfo.regularMarketChangePercent?.raw;
 
-        document.getElementById('quote').textContent = 
-        'Price: $${price?.tFixed(2)} (${change?.toFixed(2)}, ${percent?.tpFixed(2)}%}';
-    } else {
-        document.getElementById('quote').textContent = 'Stock data not found.';
-    }
-})
-.catch(error => {
-    console.error('Error fetching data: ', error);
-    document.getElementById('quote').textContent = 'Error fetching data.';
-});
+
+
 
 
 // function to buy
