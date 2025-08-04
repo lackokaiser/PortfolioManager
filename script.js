@@ -1,8 +1,50 @@
+document.addEventListener("DOMContentLoaded", () => {
+    const select = document.getElementById("stock-select");
+    const tableBody = document.querySelector("stock-tablebody");
 
+    // function to fetch data from API and to generate table once selected 
     fetch('http://localhost:5000/api/data')
     .then(res => res.json())
     .then(data => console.log('GET response:', data));
+    stocks.forEach(stock => {
+        const option = document.createElement("option");
+        option.value = stock.symbol;
+        option.textContent = stock.name || stock.ticker;
+        select.appendChild(option);
+    });
+});
 
+
+// Handle selection change
+select.addEventListener("change", async () => {
+    const symbol = select.value;
+    if (!symbol) return;
+
+    try {
+        const response = await fetch('http://localhost:5000/api/v1/stocks/${symbol}');
+        const data = await response.json();
+
+        tableBody.innerHTML = ""; // clear existing rows
+
+        data.forEach(entry => {
+            const row = createRow([
+                entry.ticker,
+                entry.stocks,
+                entry.avg_buy_price,
+                entry.current_price,
+                entry.gain/loss,
+                entry.buy,
+                entry.sell,
+            ]);
+            tableBody.appendChild(row);
+        });
+
+    } catch (err) {
+        console.error("Error loading stock data:", err);
+    }
+});
+
+// default function to create table rows
 function createRow(cells) {
     const tr = document.creatElement('tr')
         cells.forEach(cell => {
@@ -18,6 +60,9 @@ function createRow(cells) {
                                 }
 
 
+
+
+
 function formatGainLoss(value) {
     const span = document.createElement('span');
     const formatted = '$${parseFloat(value).toFixed(2)}';
@@ -27,7 +72,7 @@ function formatGainLoss(value) {
 }
 
 
-
+// function to load portfolio stock data 
 async function loadPortfolio() {
     try {
         const response = await fetch('http://localhost:5000/api/v1/portfolio');
@@ -62,7 +107,7 @@ async function loadPortfolio() {
         }
     }
 
-
+// function to load yahoo finance live market data
 async function loadMarketData() {
     try {
     const response = await fetch('http://localhost:5000/api/v1/stock/feed')
@@ -92,6 +137,8 @@ async function loadMarketData() {
 }
 }
 
+
+// function to buy
 async function buyStock(ticker, amount) {
     try {
         const res = await fetch('http://localhost:5000/api/v1/stock/${ticker}/buy/${amount}', {
@@ -106,7 +153,7 @@ console.error('Error buying stock:, error');
 }
 }
 
-
+// function to sell 
 async function sellStock(ticker, amount) {
 try {
     const res = await fetch('http://localhost:5000/api/v1/stock/${ticker}/sell/${amount}', {
@@ -120,12 +167,12 @@ loadPortfolio();
 }
 }
 
-
+// load the page 
 window.addEventListener('DOMContentLoaded', () => {
     loadPortfolio();
     loadMarketData();
 
-
+// reset page ever 5 minutes 
 setInterval(() => {
     loadPortfolio();
     loadMarketData();
