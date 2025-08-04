@@ -1,48 +1,13 @@
-document.addEventListener("DOMContentLoaded", () => {
-    const select = document.getElementById("stock-select");
-    const tableBody = document.querySelector("stock-tablebody");
+
 
     // function to fetch data from API and to generate table once selected 
     fetch('http://localhost:5000/api/data')
     .then(res => res.json())
     .then(data => console.log('GET response:', data));
-    stocks.forEach(stock => {
-        const option = document.createElement("option");
-        option.value = stock.symbol;
-        option.textContent = stock.name || stock.ticker;
         select.appendChild(option);
-    });
-});
 
 
-// Handle selection change
-select.addEventListener("change", async () => {
-    const symbol = select.value;
-    if (!symbol) return;
 
-    try {
-        const response = await fetch('http://localhost:5000/api/v1/stocks/${symbol}');
-        const data = await response.json();
-
-        tableBody.innerHTML = ""; // clear existing rows
-
-        data.forEach(entry => {
-            const row = createRow([
-                entry.ticker,
-                entry.stocks,
-                entry.avg_buy_price,
-                entry.current_price,
-                entry.gain/loss,
-                entry.buy,
-                entry.sell,
-            ]);
-            tableBody.appendChild(row);
-        });
-
-    } catch (err) {
-        console.error("Error loading stock data:", err);
-    }
-});
 
 // default function to create table rows
 function createRow(cells) {
