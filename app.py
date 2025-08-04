@@ -1,10 +1,21 @@
 from flask import Flask, jsonify, session, request,render_template, g, redirect, url_for, flash
 from flask_restful import Resource, Api,fields
-import json
+import json, pandas as pd
 import mysql.connector
+import yfinance as yf
+import functools
 
 app = Flask("api")
 api = Api(app)
+
+@functools.cache
+def get_ticker_list():
+    ticker_pd= pd.read_csv("static/assets/all_tickers.csv")
+    return ticker_pd[['Symbol', 'Name', 'Sector', 'Country']].fillna('Unknown')
+
+@app.template_filter('tojson')
+def tojson_filter(obj):
+    return json.dumps(obj)
 
 @app.route("/")
 @app.route("/home")
@@ -14,11 +25,20 @@ def home():
 # New functions
 @app.route("/portfolio")
 def about():
-    return render_template("portfolio_view.html")
+    tickers_df = get_ticker_list()
+    stocks = json.loads(tickers_df.to_json(orient="records"))
+    return render_template("portfolio_view.html",stocks=stocks)
 
 @app.route("/history")
 def history():
     return render_template("history.html")
+
+@app.route("/api/v1/stock/<ticker>/point")
+def get_point_data(ticker):
+    data = yf.download(ticker,period="1d")
+    data = data['Close']
+    print(jsonify())
+    return jsonify(data.to_dict(orient="records"))
 
 # Global database connection for the service lifetime
 def dbconn():
@@ -37,7 +57,9 @@ def dbconn():
         # restful api method of getting data
     
 class getPortfolio(Resource):
-    # Adding the default get method
+    # Adding the default get method with caching
+    # This method saves the data in the cache for faster access
+    @functools.cache
     def get(self):
         passCursor = password_db.cursor(dictionary=True)
         passCursor.execute("SELECT * FROM stockdemotwo")

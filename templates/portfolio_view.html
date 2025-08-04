@@ -2,27 +2,33 @@
 {% block title %}
 Portfolio Management
 {% endblock %}
-{% block javascriptfile %} "{{ url_for('static', filename='js/portfolio_view.js') }}"
-{% endblock %}
+{% block javascriptfile %}{{ url_for('static', filename='js/portfolio_view.js') }}{% endblock %}
 {% block content %}
 <div class="container">
     <section class="grid" id="stock-picker">
         <h1>Stock Picker</h1>
-            <input type="search" id="stock-search" name="q" />
+        <div class="search-container">
+            <input list="stock-options" id="stock-search" name="stock-search" placeholder="Enter ticker symbol" />
+            <datalist id="stock-options">
+                {% for stock in stocks %}
+                    <option value="{{ stock.Symbol }}">{{ stock.Name }} ({{ stock.sector }}) ( {{ stock.country }})</option>
+                {% endfor %}
+            </datalist>
             <button class="styled" id="search-button" type="button" onclick="searchStocks()">Search</button>
-            <div id="search-results">
-                <table id="search-results-table">
+        </div>
+        <div id="search-results" >
+                <table id="search-results-table" class="portfolio-table">
                     <thead>
                         <tr>
-                            <th>Name</th>
                             <th>Ticker</th>
                             <th>Price</th>
-                            <th></th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody id="search-results-body">
                         <!-- Search results will be populated here -->
                     </tbody>
+                </table>
             </div>
     </section>
     <section class="grid" id="portfolio-section">
@@ -44,4 +50,9 @@ Portfolio Management
 </section>
 
 </div>
+
+<script>
+    // Make stocks data available to JavaScript
+    window.allStocks = {{ stocks|tojson }};
+</script>
 {% endblock %}

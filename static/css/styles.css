@@ -65,12 +65,17 @@ nav a:hover {
 /* Table styling */
 
 .portfolio-table {
+    empty-cells: hide;
     border-collapse: collapse;
     margin: 25px 0;
     font-size: 0.9em;
     font-family: sans-serif;
     min-width: 400px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.portfolio-table:empty {
+    display: none;
 }
 
 .portfolio-table thead {
@@ -148,7 +153,7 @@ h1 {
     color: white;
     border: none;
     border-radius: 5px;
-    cursor: pointer;
+    cursor: ;
     transition: background-color 0.3s ease;
 }
 
