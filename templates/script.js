@@ -3,7 +3,6 @@
     .then(res => res.json())
     .then(data => console.log('GET response:', data));
 
-//Helper function to create a table row with cells
 function createRow(cells) {
     const tr = document.creatElement('tr')
         cells.forEach(cell => {
@@ -18,7 +17,7 @@ function createRow(cells) {
                                     return tr;
                                 }
 
-// Format gain/loss with color
+
 function formatGainLoss(value) {
     const span = document.createElement('span');
     const formatted = '$${parseFloat(value).toFixed(2)}';
@@ -27,7 +26,7 @@ function formatGainLoss(value) {
     return span;
 }
 
-// Fetch and display portfolio data
+
 
 async function loadPortfolio() {
     try {
@@ -63,7 +62,6 @@ async function loadPortfolio() {
         }
     }
 
-// fetch and display market data yahoo finance
 
 async function loadMarketData() {
     try
@@ -94,7 +92,7 @@ async function loadMarketData() {
 }
 
 
-// Buy Stock 
+
 async function buyStock(ticker, amount) {
     try {
         const res = await fetch('http://localhost:5000/api/v1/stock/${ticker}/buy/${amount}', {
@@ -109,7 +107,7 @@ console.error('Error buying stock:, error');
 }
 }
 
-// Sell stock
+
 async function sellStock(ticker, amount) {
 try {
     const res = await fetch('http://localhost:5000/api/v1/stock/${ticker}/sell/${amount}', {
@@ -123,14 +121,15 @@ loadPortfolio();
 }
 }
 
-// Initialize both tables
+
 window.addEventListener('DOMContentLoaded', () => {
     loadPortfolio();
     loadMarketData();
 
-//   Auto refresh every 5 minutes - if we would like 
+
 setInterval(() => {
     loadPortfolio();
     loadMarketData();
 },    5 * 60 *1000);
 });
+
