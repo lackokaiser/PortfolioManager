@@ -53,15 +53,15 @@ class DatabaseAccess:
         if self.get_stock_amount(ticker) < amount:
             return False
         
-        self.buy_stock(ticker, -amount)
-        return True
+        return self.buy_stock(ticker, -amount)
         
-    def buy_stock(self, ticker: str, amount: float):
+    def buy_stock(self, ticker: str, amount: float) -> bool:
         curs = self.dbConnection.cursor()
         
         curs.execute(f"insert into stockdemo (ticker, stock_name, stock_value, quantity) values ('{self._sanitize_value(ticker)}', '', {self._get_value(ticker)}, {amount})")
         self.dbConnection.commit()
         curs.close()
+        return True
     
     def _get_value(self, ticker) -> float:
         return 5  # TODO yahoo call
