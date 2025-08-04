@@ -64,7 +64,7 @@ async function loadPortfolio() {
 
 
 async function loadMarketData() {
-    try
+    try {
     const response = await fetch('http://localhost:5000/api/v1/stock/feed')
     if (!response.ok) throw new Error('Failed to fetch market data')
         const marketData = await response.json();
@@ -90,8 +90,7 @@ async function loadMarketData() {
  } catch (error) {
     console.error('Error loading market data:', error);
 }
-
-
+}
 
 async function buyStock(ticker, amount) {
     try {
