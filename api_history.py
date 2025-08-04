@@ -1,7 +1,10 @@
-from flask import Flask, jsonify, request
-from datetime import datetime, timedelta
+from flask import Flask, jsonify, request,send_file
 import yfinance as yf
-
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import io
+ß
 app = Flask(__name__)
 
 def get_history_data(ticker, start, end, interval):
@@ -17,18 +20,32 @@ def get_history_data(ticker, start, end, interval):
 
 @app.route("/api/v1/stock/<ticker>/history")
 def api_history(ticker):
-    today = datetime.today()
-    default_start = (today - timedelta(days=365)).strftime("%Y-%m-%d")
-    default_end = today.strftime("%Y-%m-%d")
-    default_interval = "1d"
+    period = request.args.get("period", "1y") 
+    interval = request.args.get("interval", "1d")
 
-    # Use defaults if not provided
-    start = request.args.get("start", default_start)
-    end = request.args.get("end", default_end)
-    interval = request.args.get("interval", default_interval)
+    ticker_data = yf.Ticker(ticker)
+    historical_data = ticker_data.history(period=period,interval=interval)
 
-    data_json = get_history_data(ticker, start, end, interval)
-    return jsonify({"ticker": ticker, "history": data_json})
+    if historical_data.empty:
+        return "No data available for this range.", 404
+
+    # Graph
+    fig, ax = plt.subplots(figsize=(12, 6))
+    ax.plot(historical_data.index, historical_data['Close'], label='Close Price')
+    ax.set_title(f"{ticker} Historical Close Price")
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Price (USD)")
+    ax.legend()
+    ax.grid(True)
+    
+    # Return graph as image
+    img = io.BytesIO()
+    plt.savefig(img, format='png')
+    plt.close(fig)
+    img.seek(0)
+    return send_file(img, mimetype='image/png')
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
