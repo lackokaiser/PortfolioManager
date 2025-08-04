@@ -26,7 +26,7 @@ function createRow(cells) {
 
 
 
-
+// Buy/Sell 
 
 function formatGainLoss(value) {
     const span = document.createElement('span');
@@ -73,34 +73,77 @@ async function loadPortfolio() {
     }
 
 // function to load yahoo finance live market data
-async function loadMarketData() {
-    try {
-    const response = await fetch('http://localhost:5000/api/v1/stock/feed')
-    if (!response.ok) throw new Error('Failed to fetch market data')
-        const marketData = await response.json();
-    
-    const tbody = document.querySelector('#market-table tbdoy');
-    tbody.innerHTML = '';
-    
-    marketData.forEach(stock => {
-        const change = stock.change >= 0 ? '+${stock.change.toFixed(2)}' : stock.change.toFixed(2);
-        const percentChange = stock.percent_change >= 0 ? '+${Stock.percent_change.toFixed(2)}%' : '${Stock.percent_change.toFixed(2)}%';
-        
-        const row = createRow([
-            stock.symbol, 
-            stock.company_name,
-            '$${stock.price.toFixed(2)}',
-            change, 
-            percentChange
- ]);
- 
- tbody.appendChild(row);
 
+const apiKey = '5fb181b2d1mshd76ac988484d044p1726b1jsn6c348d04422d';
+const apiHost = 'yh-finance.p.rapidapi.com';
+
+async function fetchQuote(symbol = "AAPL") {
+    const url = 'https://${host}/market/v2/get-quotes?symbols=${e'
+    try {
+        const res = await fetch(url, {
+            method: "GET",
+            headers: {
+                "x-RapidAPI-Host": apiHost,
+                "X=RapidApi-Key": key
+            }
+        });
+
+        if (!res.ok) {
+            throw new Error('API error: ${res.status ${res.statusText}');
+
+        }
+
+        const data = await res.json();
+        const q = data.quoteResponse?.result?.[0];
+
+        if (!q) {
+            return 'No data for "${symbol}"';
+        }
+
+        const {symbol: sym, regularMarketPrice, regularMarketChange, regularMarketChangePercent} = q;
+        return '${sym}: $${regularMarketPrice} (${regularMarketChange => 0 ? "+" : ""}${regularMarketChange.toFixed(2)}, ${regularMarketChangePercent.toFixed(2)}%)';
+
+    } catch (err) {
+        console.error(err);
+        return "Error loading data";
+    }
+}
+
+document.getElementById('btn').onclick = async () => {
+    const symbol = document.getElementById("symbol").value.trim().toUpperCase();
+    document.getElementById("quotes").textContent = "Loading...";
+    const text = await fetchQuote(symbol || "AAPL");
+    document.getElementById("quote").textContent = text;
+};
+
+fetchQuote("AAPL").then(txt => document.getElementById("quote").textContent = txt);
+
+
+
+
+
+fetch(url, { headers })
+.then(response => {
+    if(!response.ok) throw new Error("Network response was not ok");
+    return response.json();
+})
+.then(data => {
+    const priceInfo = data.quoteSummary?.result?.[0]?.price;
+    if (priceInfo) {
+        const price = priceInfo.regularMarketPrice?.raw;
+        const change = priceInfo.regularMarketChange?.raw;
+        const percent = priceInfo.regularMarketChangePercent?.raw;
+
+        document.getElementById('quote').textContent = 
+        'Price: $${price?.tFixed(2)} (${change?.toFixed(2)}, ${percent?.tpFixed(2)}%}';
+    } else {
+        document.getElementById('quote').textContent = 'Stock data not found.';
+    }
+})
+.catch(error => {
+    console.error('Error fetching data: ', error);
+    document.getElementById('quote').textContent = 'Error fetching data.';
 });
- } catch (error) {
-    console.error('Error loading market data:', error);
-}
-}
 
 
 // function to buy
