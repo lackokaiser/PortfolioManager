@@ -44,7 +44,9 @@ def get_history(ticker, mode='w'):
     period = period_map.get(mode, '1wk')
 
     history_data = finance_api.get_history(ticker.upper(), period)
-    result = [TickerHistory(**item).to_dict() for item in history_data]
+    print(history_data)
+    historyList = [item for item in history_data] 
+    result = TickerHistory(ticker, historyList, historyList[0]['Date'], historyList[-1]['Date'])
     return jsonify(result)
  
 @app.route("/api/v1/stock/<ticker>/buy/<amount>")

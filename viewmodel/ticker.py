@@ -6,7 +6,7 @@ class TickerHistory(dict):
     Represents an object holding the history of a ticker
     """
     
-    def __init__(self, ticker: str, history: list[float], fromDate: datetime, toDate: datetime):
+    def __init__(self, ticker: str, history: list[dict], fromDate: datetime, toDate: datetime):
         self.ticker = ticker
         self.history = history
         self.fromDate = fromDate
