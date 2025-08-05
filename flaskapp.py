@@ -3,33 +3,11 @@ from dal.data import DatabaseAccess
 from viewmodel.feed import FeedItem
 from viewmodel.ticker import TickerHistory
 from dal.finance_api import FinanceAPI
-import yfinance as yf
 
 app = Flask("PortfolioManagerAPI")
 finance_api = FinanceAPI()
 database = DatabaseAccess(finance_api)
 
-
-@app.route("/api/v1/stock/<ticker>/point")
-def get_point_data(ticker):
-    data = yf.download(ticker,period="1d")
-    data = data['Close']
-    print(jsonify())
-    return jsonify(data.to_dict(orient="records"))
-
-@app.route("/api/v1/portfolio")
-def get_portfolio():
-    """
-    Returns the portfolio of the user
-    """
-    portfolio = database.get_stock_pnl()
-    if not portfolio:
-        return jsonify([]), 200
-    
-    result = [TickerHistory(**item).to_dict() for item in portfolio]
-    return jsonify(result)
-
-        
 @app.route("/api/v1/stock/feed")
 @app.route("/api/v1/stock/feed/<ticker>")
 def load_feed(ticker = None):
@@ -44,10 +22,12 @@ def load_feed(ticker = None):
 
     tickers = list(set(tickers))  
     feed_data = finance_api.get_feed(tickers)
-
+    
     feed_data.sort(key=lambda x: (x["ticker"] not in database.get_owned_tickers(), -x["growth"]))
+    
 
-    result = [FeedItem(**item).to_dict() for item in feed_data]
+    result = [FeedItem(item['ticker'], item['name'], finance_api.get_current_value(item['ticker']),
+                       database.get_owned_stock(item['ticker'])[0][2], database.get_stock_pnl(item['ticker'])) for item in feed_data]
     return jsonify(result)
    
 @app.route("/api/v1/stock/<ticker>/history/<mode>")

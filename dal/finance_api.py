@@ -25,9 +25,30 @@ class FinanceAPI:
 
     def get_history(self, ticker, period='1wk'):
         stock = yf.Ticker(ticker)
-        hist = stock.history(period=period)
+        hist = stock.history(period=period, interval=("1d" if period != "1d" else "1h"))
+        
+        hist = hist.reset_index().to_dict(orient="records")
+        if period == '1d':
+            for item in hist:
+                item['Date'] = item['Datetime']
+                item.pop('Datetime')
 
         # return data as list of dictionaries
-        return hist.reset_index().to_dict(orient="records")
+        return hist
 
+    def is_ticker_valid(self, ticker):
+        tic = yf.Ticker(ticker)
+        history = tic.history(period="1d")
+        return len(history) != 0
 
+    def get_current_value(self, ticker) -> float:
+        tic = yf.Ticker(ticker)
+        history = tic.history()
+        if len(history) == 0:
+            return 0.0
+        return history["Close"].iloc[-1]
+
+if __name__ == "__main__":
+    fin = FinanceAPI()
+    
+    print(fin.get_current_value("AMZN"))
