@@ -15,10 +15,6 @@ def get_ticker_list():
     ticker_pd= pd.read_csv("static/assets/all_tickers.csv")
     return ticker_pd[['Symbol', 'Name', 'Sector', 'Country']].fillna('Unknown')
 
-@app.template_filter('tojson')
-def tojson_filter(obj):
-    return json.dumps(obj)
-
 @app.route("/")
 @app.route("/home")
 def home():
@@ -28,7 +24,6 @@ def home():
 def market():
     return render_template("market_view.html")    
 
-# New functions
 @app.route("/portfolio")
 def about():
     tickers_df = get_ticker_list()

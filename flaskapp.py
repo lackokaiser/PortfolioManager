@@ -3,11 +3,33 @@ from dal.data import DatabaseAccess
 from viewmodel.feed import FeedItem
 from viewmodel.ticker import TickerHistory
 from dal.finance_api import FinanceAPI
+import yfinance as yf
 
 app = Flask("PortfolioManagerAPI")
 finance_api = FinanceAPI()
 database = DatabaseAccess(finance_api)
 
+
+@app.route("/api/v1/stock/<ticker>/point")
+def get_point_data(ticker):
+    data = yf.download(ticker,period="1d")
+    data = data['Close']
+    print(jsonify())
+    return jsonify(data.to_dict(orient="records"))
+
+@app.route("/api/v1/portfolio")
+def get_portfolio():
+    """
+    Returns the portfolio of the user
+    """
+    portfolio = database.get_stock_pnl()
+    if not portfolio:
+        return jsonify([]), 200
+    
+    result = [TickerHistory(**item).to_dict() for item in portfolio]
+    return jsonify(result)
+
+        
 @app.route("/api/v1/stock/feed")
 @app.route("/api/v1/stock/feed/<ticker>")
 def load_feed(ticker = None):

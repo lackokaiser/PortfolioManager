@@ -2,17 +2,16 @@
 {% block title %}
 Portfolio Management
 {% endblock %}
-{% block javascriptfile %}{{ url_for('static', filename='js/portfolio_view.js') }}{% endblock %}
+{% block javascriptfile %}{{ url_for('static', filename='js/chart.js') }}{% endblock %}
 {% block content %}
 
-{% endblock %}
 <!-- need to test
 
 <!DOCTYPE html>
 <html>
 <head>
   <title>Stock Chart</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script
 </head>
 <body>
     <h1>Historical Stock Closing Price</h1>
@@ -27,11 +26,8 @@ Portfolio Management
     <label style="margin-left: 20px;">Mode:</label>
     <label><input type="radio" name="mode" value="d"> Daily</label>
     <label><input type="radio" name="mode" value="w" checked> Weekly</label>
-    <label><input type="radio" name="mode" value="m"> Monthly</label>
-  </div>
-
-  <canvas id="myChart" style="width:100%;max-width:700px;"></canvas>
-
-  <script src="{{ url_for('static', filename='chart.js') }}"></script>
-</body>
+    <label><input type="radio" name="mode" value="m"> Month
+    </body>
 </html>-->
+
+{% endblock %}
