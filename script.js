@@ -176,4 +176,3 @@ setInterval(() => {
     loadMarketData();
 },    5 * 60 *1000);
 });
-
