@@ -2,11 +2,11 @@ from flask import Flask, jsonify
 from dal.data import DatabaseAccess
 from viewmodel.feed import FeedItem
 from viewmodel.ticker import TickerHistory
-from finance_api import FinanceAPI
+from dal.finance_api import FinanceAPI
 
 app = Flask("PortfolioManagerAPI")
-database = DatabaseAccess()
 finance_api = FinanceAPI()
+database = DatabaseAccess(finance_api)
 
 @app.route("/api/v1/stock/feed")
 @app.route("/api/v1/stock/feed/<ticker>")

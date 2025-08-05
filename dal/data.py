@@ -1,5 +1,6 @@
 import mysql.connector
 from datetime import date
+from finance_api import FinanceAPI
 
 class DatabaseAccess:
     
@@ -92,6 +93,18 @@ class DatabaseAccess:
         sell_price = sum_quantity * currentPrice
         
         return sell_price - sum_value
+
+    def get_owned_tickers(self):
+        curs = self.dbConnection.cursor()
+        
+        curs.execute("select distinct ticker from stockdemo")
+        
+        data = curs.fetchall()
+        curs.close()
+        
+        res = [item[0] for item in data]
+        
+        return res
     
     def get_stock_amount(self, ticker) -> int:
         data = self.get_owned_stock()
@@ -119,10 +132,6 @@ class DatabaseAccess:
 
 if __name__ == "__main__":
     
-    da = DatabaseAccess(None)
-
-    da.buy_stock(ticker="Hehe", amount=3)
-
-    print(da.get_stock_pnl("Hehe"))
+    da = DatabaseAccess(FinanceAPI())
     
-    da.get_owned_stock()
+    da.get_owned_tickers()

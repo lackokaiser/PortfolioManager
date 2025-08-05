@@ -1,4 +1,4 @@
-from feed import FeedItem
+from viewmodel.feed import FeedItem
 from datetime import datetime
 
 class TickerHistory:
