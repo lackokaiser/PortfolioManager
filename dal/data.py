@@ -73,12 +73,18 @@ class DatabaseAccess:
         return True
     
     def _get_value(self, ticker) -> float:
+        """
+        Returns the current value of the given ticker
+        """
         return self.yFinance.get_current_value(ticker)
     
     def get_stock_pnl(self, ticker):
+        """
+        Returns your current gain or loss based on prevous buy/sell actions and the current price of the stock
+        """
         curs = self.dbConnection.cursor()
         
-        curs.execute(f"select ticker, sum(quantity), sum(stock_value * quantity) from stockdemo where ticker = '{self._sanitize_value(ticker)}' group by ticker")
+        curs.execute(f"select ticker, sum(quantity), sum(stock_value * quantity) from stockdemo where ticker = '{self._sanitize_value(ticker)}'")
         
         data = curs.fetchall()
         curs.close()
@@ -87,12 +93,27 @@ class DatabaseAccess:
         if len(data) == 0:
             return 0
         
-        sum_quantity = data[0][1]
-        sum_value = data[0][2]
+        sum_quantity = float(data[0][1])
+        sum_value = float(data[0][2])
         
         sell_price = sum_quantity * currentPrice
         
         return sell_price - sum_value
+    
+    def get_owned_stock_value(self, ticker):
+        """
+        Returns the current value of your stock on the market
+        """
+        curs = self.dbConnection.cursor()
+        
+        curs.execute(f"select sum(quantity) from stockdemo where ticker = '{self._sanitize_value(ticker)}'")
+        
+        data = curs.fetchall()
+        curs.close()
+        currentPrice = self._get_value(ticker)
+        
+        return float(data[0][0]) * currentPrice
+        
 
     def get_stock_amount(self, ticker) -> int:
         curs = self.dbConnection.cursor()

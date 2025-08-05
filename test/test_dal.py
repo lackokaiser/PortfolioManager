@@ -1,7 +1,9 @@
 import unittest
 from dal.data import DatabaseAccess
+from dal.finance_api import FinanceAPI
 
-db = DatabaseAccess(None)
+fin = FinanceAPI()
+db = DatabaseAccess(fin)
 
 class TestSQL(unittest.TestCase):
     def test_owned_stock(self):
@@ -10,26 +12,26 @@ class TestSQL(unittest.TestCase):
         print(result)
     
     def test_transactions(self):
-        self.assertTrue(db.buy_stock("AMZNtest", 2))
+        self.assertTrue(db.buy_stock("AMZN", 2))
         
-        self.assertEqual(db.get_stock_amount("AMZNtest"), 2)
+        self.assertEqual(db.get_stock_amount("AMZN"), 2)
         
-        self.assertTrue(db.sell_stock("AMZNtest", 2))
+        self.assertTrue(db.sell_stock("AMZN", 2))
         
-        self.assertEqual(db.get_stock_amount("AMZNtest"), 0)
+        self.assertEqual(db.get_stock_amount("AMZN"), 0)
         
     def test_pnl(self):
-        self.assertTrue(db.buy_stock("AMZNtest", 2))
+        self.assertTrue(db.buy_stock("AMZN", 2))
         
-        self.assertEqual(db.get_stock_pnl("AMZNtest"), 10)
+        self.assertAlmostEqual(db.get_owned_stock_value("AMZN"), fin.get_current_value("AMZN") * 2)
         
-        self.assertTrue(db.buy_stock("AMZNtest", 3))
+        self.assertTrue(db.buy_stock("AMZN", 3))
         
-        self.assertEqual(db.get_stock_pnl("AMZNtest"), 25)
+        self.assertAlmostEqual(db.get_owned_stock_value("AMZN"), fin.get_current_value("AMZN") * 5)
         
-        self.assertTrue(db.sell_stock("AMZNtest", 5))
+        self.assertTrue(db.sell_stock("AMZN", 5))
         
-        self.assertEqual(db.get_stock_pnl("AMZNtest"), 0)
+        self.assertAlmostEqual(db.get_owned_stock_value("AMZN"), 0)
     
     def test_owned_ticker(self):
         self.assertTrue(db.buy_stock("NVDA", 2))

@@ -33,6 +33,8 @@ class FinanceAPI:
     def get_current_value(self, ticker) -> float:
         tic = yf.Ticker(ticker)
         history = tic.history()
+        if len(history) == 0:
+            return 0.0
         return history["Close"].iloc[-1]
 
 if __name__ == "__main__":
