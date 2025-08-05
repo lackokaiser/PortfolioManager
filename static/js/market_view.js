@@ -26,7 +26,7 @@ function createRow(cells) {
 
 
 
-
+// Buy/Sell 
 
 function formatGainLoss(value) {
     const span = document.createElement('span');
@@ -73,34 +73,46 @@ async function loadPortfolio() {
     }
 
 // function to load yahoo finance live market data
-async function loadMarketData() {
-    try {
-    const response = await fetch('http://localhost:5000/api/v1/stock/feed')
-    if (!response.ok) throw new Error('Failed to fetch market data')
-        const marketData = await response.json();
-    
-    const tbody = document.querySelector('#market-table tbdoy');
-    tbody.innerHTML = '';
-    
-    marketData.forEach(stock => {
-        const change = stock.change >= 0 ? '+${stock.change.toFixed(2)}' : stock.change.toFixed(2);
-        const percentChange = stock.percent_change >= 0 ? '+${Stock.percent_change.toFixed(2)}%' : '${Stock.percent_change.toFixed(2)}%';
-        
-        const row = createRow([
-            stock.symbol, 
-            stock.company_name,
-            '$${stock.price.toFixed(2)}',
-            change, 
-            percentChange
- ]);
- 
- tbody.appendChild(row);
 
-});
- } catch (error) {
-    console.error('Error loading market data:', error);
+
+
+async function fetchStockData() {
+    const options = {
+        method: 'GET',
+        headers: {
+            'X-RapidAPI-Key': '5fb181b2d1mshd76ac988484d044p1726b1jsn6c348d04422d',
+            'X-RapidAPI-Host': 'yh-finance.p.rapidapi.com',
+        }
+    };
+
+    try {
+        const response = await fetch('https://yhfinance.p.rapidapi.com/stock/v3/get-summary?symbol=AAPL', options);
+        const data = await response.json();
+
+        const price = data.price.regularMarketPrice.raw;
+        const currency = data.price.currency;
+        const name = data.price.longName;
+
+        document.getElementById("stockData").innerHTML = `
+        <h2>${name} (AAPL)</h2>
+        <p>Price: ${price} ${currency}</p>
+        `;
+
+        } catch (error) {
+            document.getElementById("stockData").textContent = "Error loading data";
+            console.error(error);
+        }
+    
 }
-}
+getStockData();
+
+
+
+
+
+
+
+
 
 
 // function to buy

@@ -1,5 +1,6 @@
 import mysql.connector
 from datetime import date
+from finance_api import FinanceAPI
 
 class DatabaseAccess:
     
@@ -20,7 +21,7 @@ class DatabaseAccess:
         
         return ''.join(c for c in value if c.isdecimal() or c.isalpha())
     
-    def get_owned_stock(self, ticker = None) -> list[tuple[str, list[tuple[date, float, float]]]]:
+    def get_owned_stock(self, ticker = None) -> list[tuple[str, str, list[tuple[date, float, float]]]]:
         """
         [('AMZN', [(datetime.date(2025, 8, 1), Decimal('1'), Decimal('0'))])]
         Ticker,     transaction date,          quantity,     buying price
@@ -30,7 +31,7 @@ class DatabaseAccess:
         if ticker == None:
             curs.execute("select * from stockdemo order by ticker")
         else:
-            curs.execute(f"select * from stockdemo where ticker = '{self._sanitize_value(ticker)}' order by ticker")
+            curs.execute(f"select * from stockdemo where ticker = '{self._sanitize_value(ticker)}'")
         fetch = curs.fetchall()
         curs.close()
         
@@ -39,34 +40,34 @@ class DatabaseAccess:
         
         item = fetch[0]
         
-        res = [(item[1], [(item[5], item[4], item[3])])]
+        res = [(item[1], item[2], [(item[5], item[4], item[3])])]
         
         curr_ind = 0
         i = 1
         while(i < len(fetch)):
             while i < len(fetch) and fetch[i][1] == res[curr_ind][0]:
                 item = fetch[i]
-                res[curr_ind][1].append((item[5], item[4], item[3]))
+                res[curr_ind][2].append((item[5], item[4], item[3]))
                 i = i + 1
             if i >= len(fetch):
                 continue
             item = fetch[i]
             curr_ind = curr_ind + 1
-            res.append((item[1], [(item[5], item[4], item[3])]))
+            res.append((item[1], item[2], [(item[5], item[4], item[3])]))
             
         return res        
         
-    def sell_stock(self, ticker, amount) -> bool:
+    def sell_stock(self, ticker, amount, name="") -> bool:
         amount = self.get_stock_amount(ticker)
         if self.get_stock_amount(ticker) < amount:
             return False
         
-        return self.buy_stock(ticker, amount * -1)
+        return self.buy_stock(ticker, amount * -1, name=name)
         
-    def buy_stock(self, ticker: str, amount: float) -> bool:
+    def buy_stock(self, ticker: str, amount: float, name="") -> bool:
         curs = self.dbConnection.cursor()
         
-        curs.execute(f"insert into stockdemo (ticker, stock_name, stock_value, quantity) values ('{self._sanitize_value(ticker)}', '', {self._get_value(ticker)}, {amount})")
+        curs.execute(f"insert into stockdemo (ticker, stock_name, stock_value, quantity) values ('{self._sanitize_value(ticker)}', '{self._sanitize_value(name)}', {self._get_value(ticker)}, {amount})")
         self.dbConnection.commit()
         curs.close()
         return True
@@ -92,6 +93,18 @@ class DatabaseAccess:
         sell_price = sum_quantity * currentPrice
         
         return sell_price - sum_value
+
+    def get_owned_tickers(self):
+        curs = self.dbConnection.cursor()
+        
+        curs.execute("select distinct ticker from stockdemo")
+        
+        data = curs.fetchall()
+        curs.close()
+        
+        res = [item[0] for item in data]
+        
+        return res
     
     def get_stock_amount(self, ticker) -> int:
         data = self.get_owned_stock()
@@ -106,7 +119,7 @@ class DatabaseAccess:
         
         count = 0
         
-        for item in data[ind][1]:
+        for item in data[ind][2]:
             count = count + item[1]
         
         return count
@@ -119,10 +132,6 @@ class DatabaseAccess:
 
 if __name__ == "__main__":
     
-    da = DatabaseAccess(None)
-
-    da.buy_stock(ticker="Hehe", amount=3)
-
-    print(da.get_stock_pnl("Hehe"))
+    da = DatabaseAccess(FinanceAPI())
     
-    da.get_owned_stock()
+    da.get_owned_tickers()
