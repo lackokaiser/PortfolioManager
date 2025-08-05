@@ -6,7 +6,7 @@ CREATE TABLE stockdemo (
 	transaction_id BIGINT auto_increment PRIMARY KEY,
     ticker VARCHAR(50) NOT NULL,
     stock_name VARCHAR(50) NOT NULL,
-    stock_value float NOT NULL,
-    quantity float NOT NULL,
+    stock_value float8 NOT NULL,
+    quantity float8 NOT NULL,
     transaction_date DATE DEFAULT (now())
     );
