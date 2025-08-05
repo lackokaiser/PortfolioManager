@@ -25,8 +25,8 @@ class FinanceAPI:
 
     def get_history(self, ticker, period='1wk'):
         stock = yf.Ticker(ticker)
-        hist = stock.history(period=period, interval=("1d" if period != "1d" else "1h"))
-        
+        hist = stock.history(period=period, interval=("1d" if period != "1d" else "2m"))
+
         hist = hist.reset_index().to_dict(orient="records")
         if period == '1d':
             for item in hist:
