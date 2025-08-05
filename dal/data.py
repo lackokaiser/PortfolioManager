@@ -1,6 +1,6 @@
 import mysql.connector
 from datetime import date
-from finance_api import FinanceAPI
+from dal.finance_api import FinanceAPI
 
 class DatabaseAccess:
     
@@ -23,8 +23,8 @@ class DatabaseAccess:
     
     def get_owned_stock(self, ticker = None) -> list[tuple[str, str, list[tuple[date, float, float]]]]:
         """
-        [('AMZN', [(datetime.date(2025, 8, 1), Decimal('1'), Decimal('0'))])]
-        Ticker,     transaction date,          quantity,     buying price
+        [('AMZN', 'Amazon corp' [(datetime.date(2025, 8, 1), Decimal('1'), Decimal('0'))])]
+        Ticker,   Name,         transaction date,             quantity,     buying price
         """
         curs = self.dbConnection.cursor()
         
@@ -94,6 +94,16 @@ class DatabaseAccess:
         
         return sell_price - sum_value
 
+    def get_stock_amount(self, ticker) -> int:
+        curs = self.dbConnection.cursor()
+        
+        curs.execute(f"select sum(quantity) from stockdemo where ticker = '{self._sanitize_value(ticker)}'")
+        
+        data = curs.fetchall()
+        curs.close()
+        
+        return data[0][0]
+        
     def get_owned_tickers(self):
         curs = self.dbConnection.cursor()
         
@@ -102,27 +112,11 @@ class DatabaseAccess:
         data = curs.fetchall()
         curs.close()
         
-        res = [item[0] for item in data]
+        res = [item[0] for item in data if self.get_stock_amount(item[0]) > 0]
         
         return res
     
-    def get_stock_amount(self, ticker) -> int:
-        data = self.get_owned_stock()
-        
-        if len(data) == 0:
-            return 0
-        
-        ind = 0
-        
-        while data[ind][0] != ticker:
-            ind = ind + 1
-        
-        count = 0
-        
-        for item in data[ind][2]:
-            count = count + item[1]
-        
-        return count
+    
     
     def __del__(self):
         if self.dbConnection:
@@ -135,3 +129,5 @@ if __name__ == "__main__":
     da = DatabaseAccess(FinanceAPI())
     
     da.get_owned_tickers()
+    
+    del da

@@ -30,6 +30,16 @@ class TestSQL(unittest.TestCase):
         self.assertTrue(db.sell_stock("AMZNtest", 5))
         
         self.assertEqual(db.get_stock_pnl("AMZNtest"), 0)
+    
+    def test_owned_ticker(self):
+        self.assertTrue(db.buy_stock("NVDA", 2))
+        tickers = db.get_owned_tickers()
+        self.assertEqual(len(tickers), 1)
+        self.assertEqual(tickers[0], "NVDA")
+        self.assertTrue(db.sell_stock("NVDA", 2))
+        tickers = db.get_owned_tickers()
+        self.assertEqual(len(tickers), 0)
+        
 
 if __name__ == "__main__":
     unittest.main()

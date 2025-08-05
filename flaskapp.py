@@ -48,9 +48,12 @@ def get_history(ticker, mode='w'):
 @app.route("/api/v1/stock/<ticker>/buy/<amount>")
 def buy_stock(ticker, amount):
     """
-    Buys stock from the given ticker, returns true if the operation succeded, may not return anything otherwise
+    Buys stock from the given ticker, returns true if the operation succeded, returns false otherwise
     """
-    return jsonify(database.buy_stock(ticker, amount))
+    try:
+        return jsonify(database.buy_stock(ticker, amount))
+    except:
+        return jsonify(False)
 
 @app.route("/api/v1/stock/<ticker>/sell/<amount>")
 def sell_stock(ticker, amount):
@@ -58,3 +61,6 @@ def sell_stock(ticker, amount):
 
 if __name__ == "__main__":
     app.run()
+    
+    del database
+    del finance_api
