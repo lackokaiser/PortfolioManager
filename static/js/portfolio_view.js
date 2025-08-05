@@ -1,6 +1,6 @@
 async function fetchStocks() {
     try {
-        const response = await fetch('/api/v1/portfolio'); // Call the API endpoint
+        const response = await fetch('/api/v1/stock/feed'); // Call the API endpoint
         const passwords = await response.json(); // Parse the JSON response
         const tableBody = document.getElementById('portfolio-table-body');
 
@@ -44,7 +44,7 @@ async function searchStocks() {
         alert('Please enter a valid ticker symbol');
         return;
     }
-    const tickerResponse = await fetch(`/api/v1/stock/${ticker}/point`);
+    const tickerResponse = await fetch(`/api/v1/stock/${ticker}/history`);
     if (!tickerResponse.ok) {
         alert('Stock not found');
         return;
