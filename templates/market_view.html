@@ -1,31 +1,11 @@
-<!DOCTYPE html>
-<!--<html>
-    <head>
-        <title>Flask API test</title>
-    </head>
-    <body>
-        <h1>Fetching data from Flask api</h1>
-        <div> id="output" Waiting for data..</div>
+{% extends "layout.html" %}
+{% block title %}
+Stock Portfolio Management
+{% endblock %}
+{% block javascriptfile %}{{ url_for('static', filename='js/market_view.js') }}{% endblock %}
+{% block content %}
 
-        <!--Link to js file-->
-        <script src="js/script.js"></script>
-    </body>
-</html>
-
-<head>
-    <title>Stock Portfolio Manager</title>
-    <meta name ="description" content="Stock portfolio manager"/>
-    <meta name="keywords" content="HTML, JavaScript, Stocks, Investment, Portfolio, finance"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta charset="UTF-8"/>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/boostrap.min.css" rel="stylesheet"/>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-</head>
-<head>
-<body>
-
-    <style>
+    {% comment %} <style>
 
         h1{
         font-family: Arial, sans-serif;
@@ -77,10 +57,7 @@
         tbody tr:hover {
         background-color: #f1f1f1;
         }
-    </style>
-    <script> src="script.js" </script>
-</head>
-<body>
+    </style> {% endcomment %}
 
 <div>
     <h1>Stock Portfolio Manager</h1>
@@ -124,8 +101,5 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
-
-</body>
-</html>
+ {% endblock %}
         

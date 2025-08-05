@@ -1,3 +1,7 @@
+html {
+    scroll-behavior: smooth;
+}
+
 /* Container styling */
 .container {
     max-width: 1200px;

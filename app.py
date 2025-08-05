@@ -4,9 +4,11 @@ import json, pandas as pd
 import mysql.connector
 import yfinance as yf
 import functools
+import dal.data as dataClass
 
 app = Flask("api")
 api = Api(app)
+
 
 @functools.cache
 def get_ticker_list():
@@ -21,6 +23,10 @@ def tojson_filter(obj):
 @app.route("/home")
 def home():
     return render_template("home.html")
+
+@app.route("/market")
+def market():
+    return render_template("market_view.html")    
 
 # New functions
 @app.route("/portfolio")
@@ -40,58 +46,46 @@ def get_point_data(ticker):
     print(jsonify())
     return jsonify(data.to_dict(orient="records"))
 
-# Global database connection for the service lifetime
-def dbconn():
-    try: 
-        global password_db
-        password_db = mysql.connector.connect(
-            host = "localhost",
-            user = "root",
-            password = "n3u3da!",
-            database = "CSFoundation"
-        )
-        print(password_db)
-    except Exception as e:
-        print(f"Error connecting to database {e}")
-        
-        # restful api method of getting data
+@app.route("/api/v1/<ticker>/sell/<amount>")
+def sell_stock(ticker, amount):
+    accessLayer.sell_stock(ticker, amount)
+    return jsonify({"message": f"Sold {amount} shares of {ticker}"}), 200
+
+@app.route("/api/v1/<ticker>/buy/<amount>") 
+def buy_stock(ticker, amount):
+    accessLayer.buy_stock(ticker, amount)
+    return jsonify({"message": f"Bought {amount} shares of {ticker}"}), 200
+
+# @app.route("/api/v1/portfolio")
+# def get_portfolio():
+#     try:
+#         portfolio = accessLayer.get_owned_stock()
+#         print(f"Portfolio data: {portfolio}")
+#         return jsonify(portfolio)
+#     except Exception as e:
+#         print(f"Error fetching portfolio: {e}")
+#         return jsonify({"Could not fetch portfolio": e}), 500
     
 class getPortfolio(Resource):
     # Adding the default get method with caching
     # This method saves the data in the cache for faster access
     @functools.cache
     def get(self):
-        passCursor = password_db.cursor(dictionary=True)
-        passCursor.execute("SELECT * FROM stockdemotwo")
+        passCursor = accessLayer.dbConnection.cursor(dictionary=True)
+        passCursor.execute("SELECT * FROM stockdemo order by ticker")
         passwords = passCursor.fetchall()
         passCursor.close()
         return jsonify(passwords)
 
-    def post(self):
-        data = json.loads(request.get_data())
-        passCursor = password_db.cursor(dictionary=True)
-        sqlstmt= '''INSERT INTO stockdemotwo (Name, Password) VALUES (%s, %s)'''
-        passCursor.execute(sqlstmt, (data['name'],data['password']))
-        passCursor.close()
-        return data,201
-    
-    def put(self):
-        data = json.loads(request.get_data())
-        passCursor = password_db.cursor(dictionary=True)
-        sqlstmt= '''UPDATE stockdemotwo SET Name = %s, password = %s WHERE loginid = %s'''
-        passCursor.execute(sqlstmt, (data['name'], data['password']))
-        passCursor.close()
-        return data, 200
-
-api.add_resource(getPortfolio, '/api/portfolio')
 
 if __name__ == "__main__":
-    dbconn()
     try:
+        accessLayer = dataClass.DatabaseAccess(None)
+        api.add_resource(getPortfolio, '/api/v1/portfolio')
         app.run(debug=True, host="0.0.0.0")
     except Exception as e:
         print(f"Error: {e}")
     finally:
         # Close the database connection when the application terminates
-        password_db.close()
+        accessLayer.__del__()
 

@@ -1,6 +1,6 @@
 async function fetchStocks() {
     try {
-        const response = await fetch('/api/portfolio'); // Call the API endpoint
+        const response = await fetch('/api/v1/portfolio'); // Call the API endpoint
         const passwords = await response.json(); // Parse the JSON response
         const tableBody = document.getElementById('portfolio-table-body');
 
@@ -59,6 +59,27 @@ async function searchStocks() {
             <button class="buy-styled" type="button" onclick="buyStock('${ticker}', document.getElementById('buyQuantity-${ticker}').value)">Buy</button></td>`;
         // Append the row to the table body
         tableBody.appendChild(row);
+    });
+}
+
+function buyStock(ticker, amount) {
+    if (!amount || isNaN(amount) || amount <= 0) {
+        alert('Please enter a valid amount to buy');
+        return;
+    }
+    fetch(`/api/v1/${ticker}/buy/${amount}`, {
+        method: 'POST'
+    })
+    .then(response => {
+        if (response.ok) {
+            console.log(`Successfully bought ${amount} of stock with ticker: ${ticker}`);
+            fetchStocks();
+        } else {
+            console.error('Error buying stock:', response.statusText);
+        }
+    })
+    .catch(error => {
+        console.error('Error buying stock:', error);
     });
 }
 
