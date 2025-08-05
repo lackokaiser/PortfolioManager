@@ -54,10 +54,7 @@ def buy_stock(ticker, amount):
     """
     Buys stock from the given ticker, returns true if the operation succeded, returns false otherwise
     """
-    try:
-        return jsonify(database.buy_stock(ticker, amount))
-    except:
-        return jsonify(False)
+    return jsonify(database.buy_stock(ticker, amount))
 
 @app.route("/api/v1/stock/<ticker>/sell/<amount>")
 def sell_stock(ticker, amount):

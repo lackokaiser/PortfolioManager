@@ -58,6 +58,11 @@ class DatabaseAccess:
         return res        
         
     def sell_stock(self, ticker, amount, name="") -> bool:
+        """
+        Performs a sell operation on the given ticker.
+        
+        Returns False if there are not enough stocks owned or is an invalid ticker name
+        """
         amount = self.get_stock_amount(ticker)
         if self.get_stock_amount(ticker) < amount:
             return False
@@ -65,6 +70,13 @@ class DatabaseAccess:
         return self.buy_stock(ticker, amount * -1, name=name)
         
     def buy_stock(self, ticker: str, amount: float, name="") -> bool:
+        """
+        Perform a buy operation on the given ticker
+        
+        Returns False if the ticker is invalid
+        """
+        if not self.yFinance.is_ticker_valid(ticker):
+            return False
         curs = self.dbConnection.cursor()
         
         curs.execute(f"insert into stockdemo (ticker, stock_name, stock_value, quantity) values ('{self._sanitize_value(ticker)}', '{self._sanitize_value(name)}', {self._get_value(ticker)}, {amount})")

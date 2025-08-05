@@ -30,6 +30,11 @@ class FinanceAPI:
         # return data as list of dictionaries
         return hist.reset_index().to_dict(orient="records")
 
+    def is_ticker_valid(self, ticker):
+        tic = yf.Ticker(ticker)
+        history = tic.history(period="1d")
+        return len(history) != 0
+
     def get_current_value(self, ticker) -> float:
         tic = yf.Ticker(ticker)
         history = tic.history()
