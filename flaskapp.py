@@ -27,7 +27,7 @@ def load_feed(ticker = None):
     
 
     result = [FeedItem(item['ticker'], item['name'], finance_api.get_current_value(item['ticker']),
-                       database.get_owned_stock(item['ticker'])[0][2], database.get_stock_pnl(item['ticker'])) for item in feed_data]
+                       database.get_owned_stock(item['ticker'])[0][2], database.get_stock_pnl(item['ticker']), database.get_owned_stock_value(item['ticker'])) for item in feed_data]
     return jsonify(result)
    
 @app.route("/api/v1/stock/<ticker>/history/<mode>")
