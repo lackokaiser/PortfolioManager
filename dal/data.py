@@ -4,7 +4,7 @@ from dal.finance_api import FinanceAPI
 
 class DatabaseAccess:
     
-    def __init__(self, financeInstance):
+    def __init__(self, financeInstance: FinanceAPI):
         self.dbConnection = mysql.connector.connect(
             host="localhost",
             user="root",
@@ -73,7 +73,7 @@ class DatabaseAccess:
         return True
     
     def _get_value(self, ticker) -> float:
-        return 5  # TODO yahoo call
+        return self.yFinance.get_current_value(ticker)
     
     def get_stock_pnl(self, ticker):
         curs = self.dbConnection.cursor()
@@ -82,7 +82,7 @@ class DatabaseAccess:
         
         data = curs.fetchall()
         curs.close()
-        currentPrice = 10 # TODO add call to yahoo
+        currentPrice = self._get_value(ticker)
         
         if len(data) == 0:
             return 0

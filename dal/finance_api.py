@@ -30,4 +30,12 @@ class FinanceAPI:
         # return data as list of dictionaries
         return hist.reset_index().to_dict(orient="records")
 
+    def get_current_value(self, ticker) -> float:
+        tic = yf.Ticker(ticker)
+        history = tic.history()
+        return history["Close"].iloc[-1]
 
+if __name__ == "__main__":
+    fin = FinanceAPI()
+    
+    print(fin.get_current_value("AMZN"))

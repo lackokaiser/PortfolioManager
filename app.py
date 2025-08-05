@@ -5,9 +5,11 @@ import mysql.connector
 import yfinance as yf
 import functools
 import dal.data as dataClass
+from dal.finance_api import FinanceAPI
 
 app = Flask("api")
 api = Api(app)
+fin = FinanceAPI()
 
 
 @functools.cache
@@ -41,10 +43,7 @@ def history():
 
 @app.route("/api/v1/stock/<ticker>/point")
 def get_point_data(ticker):
-    data = yf.download(ticker,period="1d")
-    data = data['Close']
-    print(jsonify())
-    return jsonify(data.to_dict(orient="records"))
+    return jsonify({ticker: fin.get_current_value(ticker)})
 
 @app.route("/api/v1/<ticker>/sell/<amount>")
 def sell_stock(ticker, amount):
