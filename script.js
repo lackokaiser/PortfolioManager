@@ -73,38 +73,59 @@ async function loadPortfolio() {
     }
 
 // function to load yahoo finance live market data
+const express = require('express');
+const cors = require('cors');
 
+const app = express();
+const PORT = 3000;
 
+app.use(cors());
 
-async function fetchStockData() {
-    const options = {
-        method: 'GET',
-        headers: {
-            'X-RapidAPI-Key': '5fb181b2d1mshd76ac988484d044p1726b1jsn6c348d04422d',
-            'X-RapidAPI-Host': 'yh-finance.p.rapidapi.com',
-        }
-    };
-
+app.get('/stocks', async(requestAnimationFrame, res) => {
     try {
-        const response = await fetch('https://yhfinance.p.rapidapi.com/stock/v3/get-summary?symbol=AAPL', options);
+        const response = await fetch('https://finance.yahoo.com/markets/stocks/most-active/?start=0&count=200');
         const data = await response.json();
+        res.json(data);
+    } catch(error) {
+        console.error('Error fetching data:', error);
+        res.status(500).json({ error: 'Failed to fetch Stock data'});
+    }
+});
 
-        const price = data.price.regularMarketPrice.raw;
-        const currency = data.price.currency;
-        const name = data.price.longName;
+app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:$(PORT}`);
+});
 
-        document.getElementById("stockData").innerHTML = `
-        <h2>${name} (AAPL)</h2>
-        <p>Price: ${price} ${currency}</p>
-        `;
 
-        } catch (error) {
-            document.getElementById("stockData").textContent = "Error loading data";
-            console.error(error);
-        }
+//async function fetchStockData() {
+    //const options = {
+        //method: 'GET',
+        //headers: {
+            //'X-RapidAPI-Key': '5fb181b2d1mshd76ac988484d044p1726b1jsn6c348d04422d',
+            //'X-RapidAPI-Host': 'yh-finance.p.rapidapi.com',
+        //}
+    //};
+
+    //try {
+        //const response = await fetch('https://yhfinance.p.rapidapi.com/stock/v3/get-summary?symbol=AAPL', options);
+        //const data = await response.json();
+
+        //const price = data.price.regularMarketPrice.raw;
+        //const currency = data.price.currency;
+        //const name = data.price.longName;
+
+        //document.getElementById("stockData").innerHTML = `
+        //<h2>${name} (AAPL)</h2>
+        //<p>Price: ${price} ${currency}</p>
+        //`;
+
+        //} catch (error) {
+            //document.getElementById("stockData").textContent = "Error loading data";
+            //console.error(error);
+        //}
     
-}
-getStockData();
+//}
+//getStockData();
 
 
 
