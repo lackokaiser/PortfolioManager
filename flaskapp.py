@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, render_template, request
 from dal.data import DatabaseAccess
 import json
+import yfinance as yf
 import pandas as pd
 import functools
 from viewmodel.feed import FeedItem
@@ -35,6 +36,13 @@ def about():
 def history():
     return render_template("history.html")
 
+@app.route("/api/v1/stock/<ticker>/point")
+def get_point_data(ticker):
+    data = yf.download(ticker,period="1d")
+    data = data['Close']
+    print(jsonify())
+    return jsonify(data.to_dict(orient="records"))
+
 @app.route("/api/v1/stock/feed")
 @app.route("/api/v1/stock/feed/<ticker>")
 def load_feed(ticker = None):
@@ -52,7 +60,8 @@ def load_feed(ticker = None):
     
     feed_data.sort(key=lambda x: (x["ticker"] not in database.get_owned_tickers(), -x["growth"]))
     
-
+    #I think this line makes multiple calls to the function rather than calling them all t omnce#
+    #Makes it rather inefficeint upon load up
     result = [FeedItem(item['ticker'], item['name'], finance_api.get_current_value(item['ticker']),
                        database.get_owned_stock(item['ticker'])[0][2], database.get_stock_pnl(item['ticker']), database.get_owned_stock_value(item['ticker'])) for item in feed_data]
     return jsonify(result)
@@ -68,20 +77,22 @@ def get_history(ticker, mode='w'):
         'w': '1wk',
         'm': '1mo'
     }
-    period = period_map.get(mode, '1d')
+    period = period_map.get(mode, '1wk')
 
     history_data = finance_api.get_history(ticker.upper(), period)
     result = [TickerHistory(**item).to_dict() for item in history_data]
     return jsonify(result)
  
-@app.route("/api/v1/stock/<ticker>/buy/<amount>")
+@app.route("/api/v1/stock/<ticker>/buy/<float:amount>")
+@app.route("/api/v1/stock/<ticker>/buy/<int:amount>")
 def buy_stock(ticker, amount):
     """
-    Buys stock from the given ticker, returns true if the operation succeded, may not return anything otherwise
+    Buys stock from the given ticker, returns 200 if the operation succeeded, may not return anything otherwise
     """
     return jsonify(database.buy_stock(ticker, amount))
 
-@app.route("/api/v1/stock/<ticker>/sell/<amount>")
+@app.route("/api/v1/stock/<ticker>/sell/<float:amount>")
+@app.route("/api/v1/stock/<ticker>/sell/<int:amount>")
 def sell_stock(ticker, amount):
     return jsonify(database.sell_stock(ticker, amount))
 
