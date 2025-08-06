@@ -1,37 +1,35 @@
-{% extends "layout.html" %}
-{% block title %}
-Portfolio Management
-{% endblock %}
-{% block javascriptfile %}{{ url_for('static', filename='js/portfolio_view.js') }}{% endblock %}
-{% block content %}
-
-{% endblock %}
-<!-- need to test
-
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Stock Chart</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Stock History</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="static/js/history.js"></script>
 </head>
 <body>
-    <h1>Historical Stock Closing Price</h1>
-  <div style="margin-bottom: 20px;">
-    <label for="tickerSelect">Select Ticker:</label>
-    <select id="tickerSelect">
-      <option value="AAPL">AAPL</option>
-      <option value="TSLA">TSLA</option>
-      <option value="GOOGL">GOOGL</option>
-    </select>
+    <h1>Stock Price Over Time</h1>
 
-    <label style="margin-left: 20px;">Mode:</label>
-    <label><input type="radio" name="mode" value="d"> Daily</label>
-    <label><input type="radio" name="mode" value="w" checked> Weekly</label>
-    <label><input type="radio" name="mode" value="m"> Monthly</label>
-  </div>
+    <!-- Input to choose ticker -->
+    <label for="tickerInput">Enter Ticker Symbol:</label>
+    <input type="text" id="tickerInput" placeholder="e.g. AAPL">
+    <button onclick="loadStockHistory()">Load Stock</button>
+    <br><br>
 
-  <canvas id="myChart" style="width:100%;max-width:700px;"></canvas>
+    <!-- Mode selection (means time interval) -->
+    <label>Select Mode:</label><br>
 
-  <script src="{{ url_for('static', filename='chart.js') }}"></script>
+    <input type="radio" id="mode-d" name="mode" value="d">
+    <label for="mode-d">1 day</label><br>
+
+    <input type="radio" id="mode-w" name="mode" value="w">
+    <label for="mode-w">1 week</label><br>
+
+    <input type="radio" id="mode-m" name="mode" value="m">
+    <label for="mode-m">1 month</label>
+    <br><br>
+
+    <canvas id="stockChart" width="600" height="300"></canvas>
+
+    <!-- Link to JavaScript file -->
+    
 </body>
-</html>-->
+</html>
