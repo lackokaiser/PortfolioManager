@@ -1,6 +1,7 @@
 import mysql.connector
 from datetime import date
 from dal.finance_api import FinanceAPI
+import functools
 
 class DatabaseAccess:
     
@@ -63,7 +64,7 @@ class DatabaseAccess:
         
         Returns False if there are not enough stocks owned or is an invalid ticker name
         """
-        amount = self.get_stock_amount(ticker)
+        # We need more descriptive errors
         if self.get_stock_amount(ticker) < amount:
             return False
         
@@ -130,6 +131,7 @@ class DatabaseAccess:
         
         return sell_price - sum_value
     
+    #wE NEED a function get all stock values at once- this is inefficient
     def get_owned_stock_value(self, ticker):
         """
         Returns the current value of your stock on the market
@@ -145,7 +147,7 @@ class DatabaseAccess:
         return float(data[0][0]) * currentPrice
         
 
-    def get_stock_amount(self, ticker) -> int:
+    def get_stock_amount(self, ticker) -> float:
         curs = self.dbConnection.cursor()
         
         curs.execute(f"select sum(quantity) from stockdemo where ticker = '{self._sanitize_value(ticker)}'")

@@ -5,21 +5,15 @@ import mysql.connector
 import yfinance as yf
 import functools
 import dal.data as dataClass
-from dal.finance_api import FinanceAPI
 
 app = Flask("api")
 api = Api(app)
-fin = FinanceAPI()
 
 
 @functools.cache
 def get_ticker_list():
     ticker_pd= pd.read_csv("static/assets/all_tickers.csv")
     return ticker_pd[['Symbol', 'Name', 'Sector', 'Country']].fillna('Unknown')
-
-@app.template_filter('tojson')
-def tojson_filter(obj):
-    return json.dumps(obj)
 
 @app.route("/")
 @app.route("/home")
@@ -30,7 +24,6 @@ def home():
 def market():
     return render_template("market_view.html")    
 
-# New functions
 @app.route("/portfolio")
 def about():
     tickers_df = get_ticker_list()
@@ -43,7 +36,10 @@ def history():
 
 @app.route("/api/v1/stock/<ticker>/point")
 def get_point_data(ticker):
-    return jsonify({ticker: fin.get_current_value(ticker)})
+    data = yf.download(ticker,period="1d")
+    data = data['Close']
+    print(jsonify())
+    return jsonify(data.to_dict(orient="records"))
 
 @app.route("/api/v1/<ticker>/sell/<amount>")
 def sell_stock(ticker, amount):

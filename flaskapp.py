@@ -1,5 +1,9 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template, request
 from dal.data import DatabaseAccess
+import json
+import yfinance as yf
+import pandas as pd
+import functools
 from viewmodel.feed import FeedItem
 from viewmodel.ticker import TickerHistory
 from dal.finance_api import FinanceAPI
@@ -7,6 +11,37 @@ from dal.finance_api import FinanceAPI
 app = Flask("PortfolioManagerAPI")
 finance_api = FinanceAPI()
 database = DatabaseAccess(finance_api)
+
+@functools.cache
+def get_ticker_list():
+    ticker_pd= pd.read_csv("static/assets/all_tickers.csv")
+    return ticker_pd[['Symbol', 'Name', 'Sector', 'Country']].fillna('Unknown')
+
+@app.route("/")
+@app.route("/home")
+def home():
+    return render_template("home.html")
+
+@app.route("/market")
+def market():
+    return render_template("market_view.html")    
+
+@app.route("/portfolio")
+def about():
+    tickers_df = get_ticker_list()
+    stocks = json.loads(tickers_df.to_json(orient="records"))
+    return render_template("portfolio_view.html",stocks=stocks)
+
+@app.route("/history")
+def history():
+    return render_template("history.html")
+
+@app.route("/api/v1/stock/<ticker>/point")
+def get_point_data(ticker):
+    data = yf.download(ticker,period="1d")
+    data = data['Close']
+    print(jsonify())
+    return jsonify(data.to_dict(orient="records"))
 
 @app.route("/api/v1/stock/feed")
 @app.route("/api/v1/stock/feed/<ticker>")
@@ -45,22 +80,21 @@ def get_history(ticker, mode='w'):
     period = period_map.get(mode, '1wk')
 
     history_data = finance_api.get_history(ticker.upper(), period)
-    result = TickerHistory(ticker, history_data, history_data[0]['Date'], history_data[-1]['Date'])
+    result = [TickerHistory(**item).to_dict() for item in history_data]
     return jsonify(result)
  
-@app.route("/api/v1/stock/<ticker>/buy/<amount>")
+@app.route("/api/v1/stock/<ticker>/buy/<float:amount>")
+@app.route("/api/v1/stock/<ticker>/buy/<int:amount>")
 def buy_stock(ticker, amount):
     """
-    Buys stock from the given ticker, returns true if the operation succeded, returns false otherwise
+    Buys stock from the given ticker, returns 200 if the operation succeeded, may not return anything otherwise
     """
     return jsonify(database.buy_stock(ticker, amount))
 
-@app.route("/api/v1/stock/<ticker>/sell/<amount>")
+@app.route("/api/v1/stock/<ticker>/sell/<float:amount>")
+@app.route("/api/v1/stock/<ticker>/sell/<int:amount>")
 def sell_stock(ticker, amount):
     return jsonify(database.sell_stock(ticker, amount))
 
 if __name__ == "__main__":
-    app.run()
-    
-    del database
-    del finance_api
+    app.run(debug=True, host="0.0.0.0")
