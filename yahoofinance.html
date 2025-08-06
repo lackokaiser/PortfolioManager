@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Most Active Stocks</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 1rem; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
+    th { background-color: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <h2>Most Active Stocks</h2>
+  <table id="stocks-table">
+    <thead>
+      <tr>
+        <th>Symbol</th>
+        <th>Name</th>
+        <th>Price</th>
+        <th>Change</th>
+        <th>% Change</th>
+        <th>Volume</th>
+        <th>Avg Volume</th>
+        <th>Market Cap</th>
+        <th>P/E Ratio</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    // Fetch the stock data from the backend API
+    fetch('/api/stocks')
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.querySelector('#stocks-table tbody');
+        data.forEach(stock => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${stock.symbol}</td>
+            <td>${stock.name}</td>
+            <td>${stock.price}</td>
+            <td>${stock.change}</td>
+            <td>${stock.percentChange}</td>
+            <td>${stock.volume}</td>
+            <td>${stock.avgVolume}</td>
+            <td>${stock.marketCap}</td>
+            <td>${stock.peRatio}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      })
+      .catch(err => {
+        console.error('Failed to load stock data', err);
+      });
+  </script>
+</body>
+</html>
