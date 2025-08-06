@@ -90,7 +90,25 @@ class DatabaseAccess:
         """
         return self.yFinance.get_current_value(ticker)
     
-    def get_stock_pnl(self, ticker):
+    def get_all_stock_pnl(self) -> dict:
+        curs = self.dbConnection.cursor()
+        
+        curs.execute(f"select ticker, sum(quantity), sum(stock_value * quantity) from stockdemo group by ticker")
+        
+        fetch = curs.fetchall()
+        curs.close()
+        res = dict()
+        
+        for item in fetch:
+            current_price = self.yFinance.get_current_value(item[0])
+            current_value = item[1] * current_price
+            
+            res[item[0]] = current_value - item[2]
+        
+        return res
+
+    
+    def get_stock_pnl(self, ticker) -> float:
         """
         Returns your current gain or loss based on prevous buy/sell actions and the current price of the stock
         """
@@ -161,6 +179,6 @@ if __name__ == "__main__":
     
     da = DatabaseAccess(FinanceAPI())
     
-    da.get_owned_tickers()
+    print(da.get_all_stock_pnl())
     
     del da
