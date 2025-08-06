@@ -51,19 +51,28 @@ def load_feed(ticker = None):
     
     Order should be based on: Owned stocks, stock price growth
     """
-    tickers = database.get_owned_tickers() 
+    owned_tickers = database.get_owned_tickers()
+    tickers = [item for item in owned_tickers] 
     if ticker:
         tickers.append(ticker.upper())
 
     tickers = list(set(tickers))  
     feed_data = finance_api.get_feed(tickers)
     
-    feed_data.sort(key=lambda x: (x["ticker"] not in database.get_owned_tickers(), -x["growth"]))
+    feed_data.sort(key=lambda x: (x["ticker"] not in owned_tickers, -x["growth"]))
     
     pnl_dict = database.get_all_stock_pnl()
-
-    result = [FeedItem(item['ticker'], item['name'], finance_api.get_current_value(item['ticker']),
-                       database.get_owned_stock(item['ticker'])[0][2], pnl_dict[item['ticker']], database.get_owned_stock_value(item['ticker'])) for item in feed_data]
+    
+    def sum_count(transactions):
+        res = 0.0
+        for item in transactions:
+            res = res + item[1]
+        return res
+    
+    for item in feed_data:
+        owned_stock = database.get_owned_stock(item['ticker'])
+        result = FeedItem(item['ticker'], item['name'], item['price'],
+                       owned_stock[0][2], pnl_dict[item['ticker']], item['price'] * sum_count(owned_stock[0][2]))
     return jsonify(result)
    
 @app.route("/api/v1/stock/<ticker>/history/<mode>")
