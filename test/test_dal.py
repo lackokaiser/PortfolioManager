@@ -20,7 +20,7 @@ class TestSQL(unittest.TestCase):
         
         self.assertEqual(db.get_stock_amount("AMZN"), 0)
         
-    def test_pnl(self):
+    def test_current_value(self):
         self.assertTrue(db.buy_stock("AMZN", 2))
         
         self.assertAlmostEqual(db.get_owned_stock_value("AMZN"), fin.get_current_value("AMZN") * 2)
@@ -41,6 +41,12 @@ class TestSQL(unittest.TestCase):
         self.assertTrue(db.sell_stock("NVDA", 2))
         tickers = db.get_owned_tickers()
         self.assertEqual(len(tickers), 0)
+        
+class TestYahooFinance(unittest.TestCase):
+    
+    def test_valid_ticker(self):
+        self.assertFalse(fin.is_ticker_valid("NotValid"))
+        self.assertTrue(fin.is_ticker_valid("AMZN"))
         
 
 if __name__ == "__main__":

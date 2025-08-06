@@ -60,10 +60,10 @@ def load_feed(ticker = None):
     
     feed_data.sort(key=lambda x: (x["ticker"] not in database.get_owned_tickers(), -x["growth"]))
     
-    #I think this line makes multiple calls to the function rather than calling them all t omnce#
-    #Makes it rather inefficeint upon load up
+    pnl_dict = database.get_all_stock_pnl()
+
     result = [FeedItem(item['ticker'], item['name'], finance_api.get_current_value(item['ticker']),
-                       database.get_owned_stock(item['ticker'])[0][2], database.get_stock_pnl(item['ticker']), database.get_owned_stock_value(item['ticker'])) for item in feed_data]
+                       database.get_owned_stock(item['ticker'])[0][2], pnl_dict[item['ticker']], database.get_owned_stock_value(item['ticker'])) for item in feed_data]
     return jsonify(result)
    
 @app.route("/api/v1/stock/<ticker>/history/<mode>")
