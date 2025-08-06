@@ -38,10 +38,7 @@ def history():
 
 @app.route("/api/v1/stock/<ticker>/point")
 def get_point_data(ticker):
-    data = yf.download(ticker,period="1d")
-    data = data['Close']
-    print(jsonify())
-    return jsonify(data.to_dict(orient="records"))
+    return jsonify([{ticker: finance_api.get_current_value(ticker)}])
 
 @app.route("/api/v1/stock/feed")
 @app.route("/api/v1/stock/feed/<ticker>")
@@ -68,11 +65,12 @@ def load_feed(ticker = None):
         for item in transactions:
             res = res + item[1]
         return res
-    
+    result = []
     for item in feed_data:
         owned_stock = database.get_owned_stock(item['ticker'])
-        result = FeedItem(item['ticker'], item['name'], item['price'],
-                       owned_stock[0][2], pnl_dict[item['ticker']], item['price'] * sum_count(owned_stock[0][2]))
+        result.append(FeedItem(item['ticker'], item['name'], item['price'],
+                       owned_stock[0][2], pnl_dict[item['ticker']], item['price'] * sum_count(owned_stock[0][2])))
+
     return jsonify(result)
    
 @app.route("/api/v1/stock/<ticker>/history/<mode>")
