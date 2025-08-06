@@ -42,6 +42,12 @@ class TestSQL(unittest.TestCase):
         tickers = db.get_owned_tickers()
         self.assertEqual(len(tickers), 0)
         
+class TestYahooFinance(unittest.TestCase):
+    
+    def test_valid_ticker(self):
+        self.assertFalse(fin.is_ticker_valid("NotValid"))
+        self.assertTrue(fin.is_ticker_valid("AMZN"))
+        
 
 if __name__ == "__main__":
     unittest.main()
