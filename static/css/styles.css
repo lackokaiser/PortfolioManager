@@ -1,3 +1,7 @@
+html {
+    scroll-behaviur: smooth;
+}
+
 /* Container styling */
 .container {
     max-width: 1200px;
@@ -62,22 +66,20 @@ nav a {
 nav a:hover {
     color: #3498db;
 }
-
 /* Table styling */
-.table-responsive {
-    overflow-x: auto;
-    margin: 25px 0;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
 
 .portfolio-table {
+    empty-cells: hide;
     border-collapse: collapse;
     margin: 25px 0;
     font-size: 0.9em;
     font-family: sans-serif;
     min-width: 400px;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.portfolio-table:empty {
+    display: none;
 }
 
 .portfolio-table thead {
@@ -139,7 +141,6 @@ h1 {
     font-size: 28px;
 }
 
-/* Add these to your CSS file */
 .positive-value {
     color: #27ae60;
     font-weight: bold;
@@ -148,4 +149,27 @@ h1 {
 .negative-value {
     color: #e74c3c;
     font-weight: bold;
+}
+
+/* Button styling */
+.sell-styled {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: ;
+    transition: background-color 0.3s ease;
+}
+
+.sell-styled:hover {
+    background-color: #2980b9;
+}
+
+/* Input Styling*/
+.sell-input {
+    width: 60px;
+    height: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    margin-right: 10px;
 }

@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}
+Stock Portfolio Management
+{% endblock %}
+{% block javascriptfile %}{{ url_for('static', filename='js/market_view.js') }}{% endblock %}
+{% block content %}
+
+    
+
+<div>
+    <h1>Stock Portfolio Manager</h1>
+    <section class="grid" id="portfolio-section">
+        <h2>My Portfolio</h2>
+    <table id="portfolio-table">
+                <thead>
+                    <tr>
+                        <th>Ticker</th>
+                        <th>Stocks</th>
+                        <th>Avg. Buy Price</th>
+                        <th>Current Price</th>
+                        <th>Gain/Loss</th>
+                        <th>Buy</th>
+                        <th>Sell</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!--Portfolio rows will be inserted here dynamically-->
+                </tbody>
+            </table>
+        </div>
+
+        <section class="grid" id="market-section">
+            <style>
+                body {font-family: Arial, sans-serif; padding; 20px;, margin-top: 20px;}
+            </style>  
+            <head>
+                <body>
+                    <h3>Market overview</h3>
+                    <div id="stockData">Loading stock data...</div>
+
+ {% endblock %}
+        

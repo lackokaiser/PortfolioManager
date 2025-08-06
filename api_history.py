@@ -4,8 +4,25 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import io
-ß
+
 app = Flask(__name__)
+
+def get_history_data(ticker, start, end, interval):
+    ticker_obj = yf.Tickers(ticker)
+    data = ticker_obj.history(
+        start=start,
+        end=end,
+        interval=interval
+    )
+    return data.reset_index().to_dict(orient="records")
+
+
+@app.route("/api/v1/stock/<ticker>/point")
+def get_point_data(ticker):
+    data = yf.download(ticker,period="1d")
+    data = data['Close']
+    print(jsonify())
+    return jsonify(data.to_dict(orient="records"))
 
 @app.route("/api/v1/stock/<ticker>/history")
 def api_history(ticker):

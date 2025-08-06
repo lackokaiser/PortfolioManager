@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+{% block title %}
+Portfolio Management
+{% endblock %}
+{% block javascriptfile %}{{ url_for('static', filename='js/chart.js') }}{% endblock %}
+{% block content %}
+
+<!-- need to test
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Stock Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script
+</head>
+<body>
+    <h1>Historical Stock Closing Price</h1>
+  <div style="margin-bottom: 20px;">
+    <label for="tickerSelect">Select Ticker:</label>
+    <select id="tickerSelect">
+      <option value="AAPL">AAPL</option>
+      <option value="TSLA">TSLA</option>
+      <option value="GOOGL">GOOGL</option>
+    </select>
+
+    <label style="margin-left: 20px;">Mode:</label>
+    <label><input type="radio" name="mode" value="d"> Daily</label>
+    <label><input type="radio" name="mode" value="w" checked> Weekly</label>
+    <label><input type="radio" name="mode" value="m"> Month
+    </body>
+</html>-->
+
+{% endblock %}
