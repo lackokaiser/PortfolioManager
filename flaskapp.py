@@ -59,17 +59,24 @@ def load_feed(ticker = None):
     feed_data.sort(key=lambda x: (x["ticker"] not in owned_tickers, -x["growth"]))
     
     pnl_dict = database.get_all_stock_pnl()
+    owned = database.get_owned_stock()
     
     def sum_count(transactions):
         res = 0.0
         for item in transactions:
             res = res + item[1]
         return res
+
+    def find_tuple(owned, ticker):
+        for item in owned:
+            if item[0] == ticker:
+                return item
+        return None
     result = []
     for item in feed_data:
-        owned_stock = database.get_owned_stock(item['ticker'])
+        owned_stock = find_tuple(owned, item['ticker'])
         result.append(FeedItem(item['ticker'], item['name'], item['price'],
-                       owned_stock[0][2], pnl_dict[item['ticker']], item['price'] * sum_count(owned_stock[0][2])))
+                       owned_stock[2], pnl_dict[item['ticker']], item['price'] * sum_count(owned_stock[2])))
 
     return jsonify(result)
    
