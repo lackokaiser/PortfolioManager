@@ -176,12 +176,12 @@ class DatabaseAccess:
     def get_owned_tickers(self):
         curs = self.dbConnection.cursor()
         
-        curs.execute("select distinct ticker from stockdemo")
+        curs.execute("select distinct ticker, sum(quantity) from stockdemo group by ticker")
         
         data = curs.fetchall()
         curs.close()
         
-        res = [item[0] for item in data if self.get_stock_amount(item[0]) > 0]
+        res = [item[0] for item in data if item[1] > 0]
         
         return res
     
