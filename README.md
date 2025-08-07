@@ -19,3 +19,13 @@ The aim was to have SQL and Yahoo Finance related code in their separate module.
 Flask calls these wrappers to receive the information needed by the client and returns it in a json format.
 
 The client will call these endpoints and process the information received. This approach makes the client very flexible, as it is no longer dependent on Flask itself, allowing the use of other technologies to write it.
+
+## API usage
+
+The API supports the following endpoints:
+
+* /api/v1/stock/feed -- Returns the feed of owned stock, contains data like: pnl, current value of stock, transaction list
+* /api/v1/stock/\<ticker\>/history -- Returns a week's history of the given stock 
+* /api/v1/stock/\<ticker\>/history/\<mode\> -- Similar to /api/v1/stock/\<ticker\>/history. mode can be d - 1 day, w - 1 week, m - 1 month
+* /api/v1/stock/\<ticker\>/buy/\<amount\> -- Buys a certain amount from the given stock. Returns True or False depending on successful completion
+* /api/v1/stock/\<ticker\>/sell/\<amount\> -- Sell a certain amount from the given stock. Returns True or False depending on successful completion
