@@ -1,18 +1,43 @@
-from flask import Flask, jsonify
-import requests
-from flask_cors import CORS 
+from flask import Flask, jsonify, render_template, request
+import yfinance as yf
 
-app = Flask(__name__)
+app = flask(__name__)
 
-FinnHub_API_Key = 'd29n63hr01qvhsfu6d40d29n63hr01qvhsfu6d4g'
+@app.route("/")
+def index():
+    return render_template("market.html")
 
-    # Endpoint to get the current stock price
-@app.route('/stock/<symbol>', methods=['GET'])
-def get_stock(symbol):
-    url = f'https://finnhub.io/api/v1/quote?symbol={symbol}&token={API_KEY}'
-    response = requests.get(url)
-    data = response.json()
-    return jsonify(data)
-
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route("/stocks")
+def get_stocks():
+    symbols_param = request.args.get("symbols", " ")
+    
+    if not re.match(r'^([A-Za-z] +,)*[A-Za-z]+$', symbols_param):
+        return jsonify({"error": "Invalid symbols format"}), 400
+    
+    symbols = symbols_param.split(",")
+    results = []
+    
+    for symbol in symbols:
+        ticker = yf.Ticker(symbol)
+        hist = ticker.history(period="1mo")
+        
+        if hist.empty:
+            continue
+        
+        latest = hist.iloc[-1]
+        date = hist.index[-1].strftime('%y=%m-%d')
+        
+        results.append = ({
+            "Symbol": symbol,
+            "Date": date,
+            "Open": round(latest["Open"], 2),
+            "High": round(latest["High"], 2),
+            "Low": round(latest["Low"], 2),
+            "Close": round(latest["Close"], 2),
+            "Volume": int(latest["Volume"])
+            })
+        
+        return jsonify(results)
+    
+    if __name__ == "__main__":
+        app.run(debug=True)
