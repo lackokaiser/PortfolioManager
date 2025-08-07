@@ -41,17 +41,14 @@ def get_point_data(ticker):
     return jsonify([{ticker: finance_api.get_current_value(ticker)}])
 
 @app.route("/api/v1/stock/feed")
-@app.route("/api/v1/stock/feed/<ticker>")
-def load_feed(ticker = None):
+def load_feed():
     """
     Should return a sorted list of stocks containing our own tracked items as well
     
     Order should be based on: Owned stocks, stock price growth
     """
     owned_tickers = database.get_owned_tickers()
-    tickers = [item for item in owned_tickers] 
-    if ticker:
-        tickers.append(ticker.upper())
+    tickers = [item for item in owned_tickers]
 
     tickers = list(set(tickers))  
     feed_data = finance_api.get_feed(tickers)
