@@ -130,7 +130,24 @@ class DatabaseAccess:
         
         return sell_price - sum_value
     
-    #wE NEED a function get all stock values at once- this is inefficient
+    def get_all_owned_stock_value(self):
+        """
+        Returns the current value of all stocks you own
+        """
+        curs = self.dbConnection.cursor()
+        
+        curs.execute(f"select ticker, sum(quantity) from stockdemo group by ticker")
+        data = curs.fetchall()
+        curs.close()
+        
+        res = []
+        for item in data:
+            currentPrice = self._get_value(item[0])
+            res.append((item[0], currentPrice * item[1]))
+        
+        return res
+            
+        
     def get_owned_stock_value(self, ticker):
         """
         Returns the current value of your stock on the market
