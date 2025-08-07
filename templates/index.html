@@ -1,39 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
+{%  extends "layout.html"%}
+
+{% block title %}
+Portfolio Management
+{% endblock %}
+
+{% block stylefile %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+{% endblock %}
+
+
+{% block javascriptfile %}
+{{ url_for('static', filename='js/chart.js') }}
+{% endblock %}
+
+
+{% block content %}
+<div class="Market page">
   <title>Stock Viewer with Time Range</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <style>
-    body { 
-      font-family: Arial, sans-serif;
-      padding: 20px; 
-    }
-
-    input, select, button {
-      padding: 8px;
-      font-size: 16px;
-      margin-right: 10px;
-    }
-
-    .stock-section {
-      margin-top: 30px;
-    }
-
-    canvas {
-      max-width:100px;
-      margin-bottom: 20px;
-    }
-
-    table {
-      border-collapse: collapse; 
-      width: 100%;
-    margin-top: 10px; 
-  }
-    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: left; }
-    th { background-color: #f0f0f0; }
-  </style>
-</head>
-<body>
     
   <h1>Market Overview</h1>
 
