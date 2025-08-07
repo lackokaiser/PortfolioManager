@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Data Dashboard</title>
+    <script>
+        // Function to get stock data from the backend
+        async function getStockData(symbol) {
+            const response = await fetch(`/stock/${symbol}`);
+            const data = await response.json();
+            document.getElementById('stock-price').innerText = `Stock Price: $${data.c}`;
+            document.getElementById('stock-high').innerText = `High Price: $${data.h}`;
+            document.getElementById('stock-low').innerText = `Low Price: $${data.l}`;
+            document.getElementById('stock-open').innerText = `Open Price: $${data.o}`;
+            document.getElementById('stock-close').innerText = `Close Price: $${data.pc}`;
+        }
+
+        // On page load, get data for a default symbol
+        window.onload = function() {
+            getStockData('AAPL'); // Default symbol: Apple
+        };
+    </script>
+</head>
+<body>
+    <h1>Stock Data Dashboard</h1>
+    <div>
+        <h2 id="stock-price">Stock Price: Loading...</h2>
+        <p id="stock-high">High Price: Loading...</p>
+        <p id="stock-low">Low Price: Loading...</p>
+        <p id="stock-open">Open Price: Loading...</p>
+        <p id="stock-close">Close Price: Loading...</p>
+    </div>
+</body>
+</html>
