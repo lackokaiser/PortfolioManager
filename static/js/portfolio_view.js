@@ -1,3 +1,5 @@
+let chart;
+
 async function fetchStocks() {
     try {
         const response = await fetch('/api/v1/stock/feed'); // Call the API endpoint
@@ -89,3 +91,74 @@ function validateInput(input) {
 
 // Fetch passwords when the page loads
 window.onload = fetchStocks;
+
+function loadPortfolioPerformance() {
+    const time_mode = document.querySelector('input[name="mode"]:checked');
+
+    if (!time_mode) {
+        alert("Please select a time period.");
+        return;
+    }
+
+    const mode = time_mode.value;
+    const ctx = document.getElementById('portfolioChart').getContext('2d');
+
+    fetch(`/api/v1/portfolio/performance/${mode}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+            return response.json();
+        })
+        .then(data => {
+            const history = data.history;
+            const dates = history.map(point => point.Date);
+            const values = history.map(point => point.Value);
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: `Total Portfolio Value`,
+                        data: values,
+                        borderColor: 'green',
+                        fill: false,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Portfolio Performance (${mode.toUpperCase()})`
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Total Value (USD)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error("Error fetching portfolio performance data:", error);
+            alert("Failed to load portfolio performance.");
+        });
+}

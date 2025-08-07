@@ -9,7 +9,7 @@ class DatabaseAccess:
         self.dbConnection = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="n3u3da!",
+            password="computer1",
             database="CSFoundations"
         )
         self.yFinance = financeInstance
@@ -184,6 +184,15 @@ class DatabaseAccess:
         res = [item[0] for item in data if self.get_stock_amount(item[0]) > 0]
         
         return res
+    
+    def get_owned_stock_raw(self, ticker):
+        curs = self.dbConnection.cursor()
+        curs.execute("SELECT * FROM stockdemo WHERE ticker = %s", (ticker,))
+        data = curs.fetchall()
+        curs.close()
+        
+        return data
+
     
     
     

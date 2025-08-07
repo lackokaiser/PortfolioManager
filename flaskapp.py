@@ -112,5 +112,53 @@ def buy_stock(ticker, amount):
 def sell_stock(ticker, amount):
     return jsonify(database.sell_stock(ticker, amount))
 
+@app.route("/api/v1/portfolio/performance/<mode>", methods=["GET"])
+def portfolio_performance(mode):
+    period_map = {
+        'd': '1d',
+        'w': '1wk',
+        'm': '1mo',
+        'y':'1y'
+    }
+
+    period = period_map.get(mode, '1wk')
+
+    tickers = database.get_owned_tickers()  
+    portfolio_history = {}
+
+    for ticker in tickers:
+        records = database.get_owned_stock_raw(ticker)
+
+        print(f"DEBUG: Raw records for {ticker} → {records}")
+
+        if not records:
+            continue
+
+        # Sum up all quantities for ticker
+        quantity = sum(row[4] for row in records) 
+
+        # Get historical prices 
+        history = finance_api.get_history(ticker, period)
+
+        for point in history:
+            date = point['Date']
+            value = round(point['Close'] * quantity, 2)
+
+            if date not in portfolio_history:
+                portfolio_history[date] = 0
+            portfolio_history[date] += value
+
+    # Sort by date 
+    sorted_history = [
+        {"Date": date, "Value": round(value, 2)}
+        for date, value in sorted(portfolio_history.items())
+    ]
+
+    return jsonify({"history": sorted_history})
+
+
+
+
+
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
