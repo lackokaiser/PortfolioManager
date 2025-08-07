@@ -1,5 +1,6 @@
 async function fetchStocks() {
     try {
+        fetchPortfolio(); // Fetch portfolio data first
         const response = await fetch('/api/v1/stock/feed'); // Call the API endpoint
         const passwords = await response.json(); // Parse the JSON response
         const tableBody = document.getElementById('portfolio-table-body');
@@ -84,6 +85,42 @@ function validateInput(input) {
         return false;
     }
     else return true;
+}
+
+async function fetchPortfolio() {
+    try {
+        const response = await fetch('/api/v1/portfolio');
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        const chartElement = document.getElementById('portfolio-chart');
+        const chartData = await response.json();
+        
+        new Chart(chartElement, {
+            type: 'line',   
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Portfolio Value',
+                    data: chartData.values,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    } catch (error) {
+        console.error('Error fetching portfolio data:', error);
+        const chartElement = document.getElementById('portfolio-chart');
+        chartElement.innerHTML = '<p>Error loading portfolio data.</p>';
+    }
 }
 
 

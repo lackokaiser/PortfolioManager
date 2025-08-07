@@ -1,7 +1,7 @@
 import yfinance as yf
 
 class FinanceAPI:
-    def get_feed(self, tickers):
+    def get_feed(self, tickers, close=False):
         data = []
         stocks = yf.Tickers(tickers)
         for ticker in tickers:
@@ -47,7 +47,7 @@ class FinanceAPI:
         if len(history) == 0:
             return 0.0
         return history["Close"].iloc[-1]
-
+    
 if __name__ == "__main__":
     fin = FinanceAPI()
     

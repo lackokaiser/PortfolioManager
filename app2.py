@@ -19,7 +19,7 @@ def get_stocks():
     
     for symbol in symbols:
         ticker = yf.Ticker(symbol)
-        hist = ticker.history(period="1mo")
+        hist = ticker.history(period="1d")
         
         if hist.empty:
             continue

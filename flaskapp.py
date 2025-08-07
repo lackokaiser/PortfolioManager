@@ -17,15 +17,13 @@ def get_ticker_list():
     ticker_pd= pd.read_csv("static/assets/all_tickers.csv")
     return ticker_pd[['Symbol', 'Name', 'Sector', 'Country']].fillna('Unknown')
 
-@app.route("/")
-@app.route("/home")
-def home():
-    return render_template("home.html")
 
 @app.route("/market")
 def market():
     return render_template("market_view.html")    
 
+@app.route("/")
+@app.route("/home")
 @app.route("/portfolio")
 def about():
     tickers_df = get_ticker_list()
@@ -109,6 +107,25 @@ def buy_stock(ticker, amount):
 @app.route("/api/v1/stock/<ticker>/sell/<int:amount>")
 def sell_stock(ticker, amount):
     return jsonify(database.sell_stock(ticker, amount))
+
+@app.route("/api/v1/portfolio")
+def get_portfolio_performance():
+    """
+    Returns the current portfolio performance
+    """
+    try:
+        owned_tickers = database.get_owned_tickers()
+        stocks = yf.Tickers(owned_tickers).download(period='1wk', auto_adjust=True)
+        day_performance = stocks.Close
+        df = database.get_transaction_history()
+        cumulative_holdings = database.calculate_cumulative_holdings(df)
+        cumulative_valuation = cumulative_holdings.multiply(day_performance, axis=0,fill_value=1).sum(axis=1)
+        cumulative_valuation.columns = ['Date', 'Cumulative Valuation']
+        print(f"Cumulative valuation: {json.dumps(cumulative_valuation)}")
+        return jsonify(cumulative_valuation.to_dict(orient='records'))
+    except Exception as e:
+        print(f"Error fetching portfolio: {e}")
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")

@@ -2,6 +2,8 @@ import mysql.connector
 from datetime import date
 from dal.finance_api import FinanceAPI
 import functools
+from datetime import datetime as dt
+import pandas as pd
 
 class DatabaseAccess:
     
@@ -168,6 +170,70 @@ class DatabaseAccess:
         
         return res
     
+    def get_transaction_history(self, start_date: str = None, end_date: str = None) -> pd.DataFrame:
+        """
+        Get transaction history from database and return as DataFrame
+        """
+        query = """
+        SELECT ticker, stock_name, stock_value, quantity, transaction_date 
+        FROM stockdemo 
+        """
+        params = []
+        
+        #Use once datepicker implemented in html
+        if start_date:
+            query += " AND transaction_date >= %s"
+            params.append(start_date)
+        if end_date:
+            query += " AND transaction_date <= %s"
+            params.append(end_date)
+            
+        query += " ORDER BY transaction_date ASC"
+        
+        df = pd.read_sql(query, self.dbConnection, params=params)
+        df['transaction_date'] = pd.to_datetime(df['transaction_date'])
+        return df
+        
+    def calculate_cumulative_holdings(self, transactions_df):
+        """
+        Calculate cumulative holdings for each ticker over time - improved version
+        """
+        if transactions_df.empty:
+            return pd.DataFrame()
+        
+        # Make sure transaction_date is datetime
+        transactions_df = transactions_df.copy()
+        transactions_df['transaction_date'] = pd.to_datetime(transactions_df['transaction_date'])
+        
+        # Aggregate transactions by date and ticker (in case of multiple transactions on same day)
+        daily_transactions = (transactions_df
+                            .groupby(['transaction_date', 'ticker'])['quantity']
+                            .sum()
+                            .reset_index())
+        
+        # Create date range from first transaction to today
+        start_date = daily_transactions['transaction_date'].min().date()
+        end_date = dt.now().date()
+        date_range = pd.date_range(start="2025-07-31", end=end_date, freq='D')
+        
+        # Get unique tickers
+        tickers = daily_transactions['ticker'].unique()
+        
+        # Initialize result dataframe
+        result = pd.DataFrame(index=date_range, columns=tickers).fillna(0.0)
+        
+        # For each ticker, calculate cumulative holdings
+        for ticker in tickers:
+            ticker_transactions = daily_transactions[daily_transactions['ticker'] == ticker].copy()
+            ticker_transactions.set_index('transaction_date', inplace=True)
+            
+            # Reindex to match our date range
+            ticker_series = ticker_transactions['quantity'].reindex(date_range, fill_value=0.0)
+            
+            # Calculate cumulative sum
+            result[ticker] = ticker_series.cumsum()
+        
+        return result
     
     
     def __del__(self):
