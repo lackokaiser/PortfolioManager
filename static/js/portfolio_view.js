@@ -1,6 +1,6 @@
 async function fetchStocks() {
     try {
-        const response = await fetch('/api/v1/portfolio'); // Call the API endpoint
+        const response = await fetch('/api/v1/stock/feed'); // Call the API endpoint
         const passwords = await response.json(); // Parse the JSON response
         const tableBody = document.getElementById('portfolio-table-body');
 
@@ -10,8 +10,8 @@ async function fetchStocks() {
         passwords.forEach(password => {
             console.log(password)
             const row = document.createElement('tr');
-            row.innerHTML = `<td>${password.name}</td><td>${password.ticker}</td><td>${password.value}</td><td>${password.quantity}</td>
-           <td> <input class="sell-input" type="number" id="sellQuantity-${password.ticker}" name="sellQuantity" min="0" max='${password.quantity}' />
+            row.innerHTML = `<td>${password.name}</td><td>${password.ticker}</td><td>${password.currentValue}</td><td>${password.volumeCount}</td>
+           <td> <input class="sell-input" type="decimal" id="sellQuantity-${password.ticker}" name="sellQuantity" min="0" max='${password.volumeCount}' />
              <button class="sell-styled" type="button" onclick="sellStock('${password.ticker}', document.getElementById('sellQuantity-${password.ticker}').value)">Sell</button></td>`;
             tableBody.appendChild(row);
         });
@@ -22,10 +22,7 @@ async function fetchStocks() {
 
 async function sellStock(ticker,amount) {
     try {
-        const response = await fetch(`/api/v1/${ticker}/sell/${amount}`, {
-            method: 'PUT'
-        });
-
+        const response = await fetch(`/api/v1/stock/${ticker}/sell/${amount}`);
         if (response.ok) {
             console.log(`Successfully sold ${amount} of stock with ticker: ${ticker}`);
             fetchStocks();
@@ -67,9 +64,7 @@ function buyStock(ticker, amount) {
         alert('Please enter a valid amount to buy');
         return;
     }
-    fetch(`/api/v1/${ticker}/buy/${amount}`, {
-        method: 'POST'
-    })
+    fetch(`/api/v1/stock/${ticker}/buy/${amount}`)
     .then(response => {
         if (response.ok) {
             console.log(`Successfully bought ${amount} of stock with ticker: ${ticker}`);

@@ -1,0 +1,71 @@
+Found this link for html date input tag- link to python function?
+
+https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Elements/input/date
+
+cursors
+
+https://developer.mozilla.org/en-US/docs/Web/CSS/cursor
+
+We need functionality for yfinance that searches for stocks w wildcard type search
+
+Invesigate yfinance subscribe functionality
+this link for yfinance subscribe functionality
+async def subscribe(self, symbols: Union[str, List[str]]):
+
+Think about caching the point data about stocks
+
+Store list of all tickers upon loadup
+
+{% comment %} <style>
+
+        h1{
+        font-family: Arial, sans-serif;
+        text-align: center;
+        margin-bottom: 30px;"
+        color:black;
+        }
+
+
+        h3{
+            font-family: Arial, sans-serif;
+        }
+
+
+        .container {
+        display: flex;
+        gap: 40px;
+        justify-content: center;
+        flex-wrap: wrap;
+        }
+
+        .grid {
+        background: white;
+        border-radius: 6px;
+        box-shadow: 0 0 10px rgb(0 0 0 /0.1);
+        padding: 20px;
+        width: 480px;
+        }
+
+        table {
+        border: 2px solid green;
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+        }
+
+        th, td {
+        border: 1px solid green;
+        text-align: left;
+        padding: 4px 8px;
+        border-bottom: 1px solid ddd;
+        }
+
+        th {
+        background-color:rgb(8, 131, 59);
+        color: white;
+        }
+
+        tbody tr:hover {
+        background-color: #f1f1f1;
+        }
+    </style> {% endcomment %}

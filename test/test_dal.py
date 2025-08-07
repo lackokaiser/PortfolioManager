@@ -20,7 +20,7 @@ class TestSQL(unittest.TestCase):
         
         self.assertEqual(db.get_stock_amount("AMZN"), 0)
         
-    def test_pnl(self):
+    def test_current_value(self):
         self.assertTrue(db.buy_stock("AMZN", 2))
         
         self.assertAlmostEqual(db.get_owned_stock_value("AMZN"), fin.get_current_value("AMZN") * 2)

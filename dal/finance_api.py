@@ -3,9 +3,9 @@ import yfinance as yf
 class FinanceAPI:
     def get_feed(self, tickers):
         data = []
+        stocks = yf.Tickers(tickers)
         for ticker in tickers:
-            stock = yf.Ticker(ticker)
-            info = stock.info
+            info = stocks.tickers[ticker].info
 
             # calculating the price growth
             current = info.get("regularMarketPrice", 0)

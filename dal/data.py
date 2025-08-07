@@ -1,6 +1,7 @@
 import mysql.connector
 from datetime import date
 from dal.finance_api import FinanceAPI
+import functools
 
 class DatabaseAccess:
     
@@ -63,7 +64,7 @@ class DatabaseAccess:
         
         Returns False if there are not enough stocks owned or is an invalid ticker name
         """
-        amount = self.get_stock_amount(ticker)
+        # We need more descriptive errors
         if self.get_stock_amount(ticker) < amount:
             return False
         
@@ -90,7 +91,25 @@ class DatabaseAccess:
         """
         return self.yFinance.get_current_value(ticker)
     
-    def get_stock_pnl(self, ticker):
+    def get_all_stock_pnl(self) -> dict:
+        curs = self.dbConnection.cursor()
+        
+        curs.execute(f"select ticker, sum(quantity), sum(stock_value * quantity) from stockdemo group by ticker")
+        
+        fetch = curs.fetchall()
+        curs.close()
+        res = dict()
+        
+        for item in fetch:
+            current_price = self.yFinance.get_current_value(item[0])
+            current_value = item[1] * current_price
+            
+            res[item[0]] = current_value - item[2]
+        
+        return res
+
+    
+    def get_stock_pnl(self, ticker) -> float:
         """
         Returns your current gain or loss based on prevous buy/sell actions and the current price of the stock
         """
@@ -112,6 +131,7 @@ class DatabaseAccess:
         
         return sell_price - sum_value
     
+    #wE NEED a function get all stock values at once- this is inefficient
     def get_owned_stock_value(self, ticker):
         """
         Returns the current value of your stock on the market
@@ -127,7 +147,7 @@ class DatabaseAccess:
         return float(data[0][0]) * currentPrice
         
 
-    def get_stock_amount(self, ticker) -> int:
+    def get_stock_amount(self, ticker) -> float:
         curs = self.dbConnection.cursor()
         
         curs.execute(f"select sum(quantity) from stockdemo where ticker = '{self._sanitize_value(ticker)}'")
@@ -161,6 +181,6 @@ if __name__ == "__main__":
     
     da = DatabaseAccess(FinanceAPI())
     
-    da.get_owned_tickers()
+    print(da.get_all_stock_pnl())
     
     del da
