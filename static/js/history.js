@@ -1,70 +1,87 @@
-/* need to test
+let chart;
 
-let chartInstance = null;
+console.log("history.js loaded");  // Script running?
 
-function fetchAndRenderChart(ticker, mode) {
-  const xValues = [];
-  const yValues = [];
+function loadStockHistory() {
+    const ticker = document.getElementById('tickerInput').value.toUpperCase().trim().replace(/[^A-Z0-9.]/g, '');
+    const time_mode = document.querySelector('input[name="mode"]:checked');
 
-  fetch(`/api/v1/stock/${ticker}/history/${mode}`)
-    .then(response => response.json())
-    .then(data => {
-      data.forEach(item => {
-        xValues.push(item.date);
-        yValues.push(item.close);
-      });
+    console.log("loadStockHistory() called"); 
 
-      if (chartInstance) {
-        chartInstance.destroy();
-      }
+    if (!ticker) {
+        alert('Please enter a stock ticker.');
+        return;
+    }
 
-      chartInstance = new Chart("myChart", {
-        type: "line",
-        data: {
-          labels: xValues,
-          datasets: [{
-            label: `${ticker} Closing Price`,
-            fill: false,
-            pointRadius: 2,
-            borderColor: "rgba(75,192,192,1)",
-            data: yValues
-          }]
-        },
-        options: {
-          responsive: true,
-          plugins: {
-            title: {
-              display: true,
-              text: `Stock Price History: ${ticker} (${mode.toUpperCase()})`
+    if (!time_mode) {
+        alert("Please select a time period.");
+        return;
+    }
+
+    const mode = time_mode.value;
+    console.log(`Ticker: ${ticker}, Mode: ${mode}`);  // Ticker and Mode?
+
+    // Correct canvas element ID here:
+    const ctx = document.getElementById('stockChart').getContext('2d');
+
+    fetch(`/api/v1/stock/${ticker}/history/${mode}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
             }
-          },
-          scales: {
-            x: {
-              title: { display: true, text: "Date" }
-            },
-            y: {
-              title: { display: true, text: "Price ($)" }
+            return response.json();
+        })
+        .then(data => {
+            const history = data.history;
+            console.log("Data received:", history);  
+
+            const dates = history.map(point => point.Date);
+            const prices = history.map(point => point.Close);
+
+            if (chart) {
+                chart.destroy();
             }
-          }
-        }
-      });
-    })
-    .catch(err => console.error("Error fetching chart data:", err));
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: `${data.ticker} Price`,
+                        data: prices,
+                        borderColor: 'blue',
+                        fill: false,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: `Stock Price History for ${data.ticker} (${mode.toUpperCase()})`
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            title: {
+                                display: true,
+                                text: 'Price (USD)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Date'
+                            }
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error("Error fetching stock data:", error);
+            alert("Failed to load stock data.");
+        });
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-  const tickerSelect = document.getElementById("tickerSelect");
-
-  function updateChart() {
-    const ticker = tickerSelect.value;
-    const mode = document.querySelector('input[name="mode"]:checked').value;
-    fetchAndRenderChart(ticker, mode);
-  }
-
-  tickerSelect.addEventListener("change", updateChart);
-  document.querySelectorAll('input[name="mode"]').forEach(radio => {
-    radio.addEventListener("change", updateChart);
-  });
-
-  fetchAndRenderChart("AAPL", "w");
-});*/
