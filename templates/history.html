@@ -1,43 +1,51 @@
 {% extends "layout.html" %}
+
 {% block title %}
 Portfolio Management
 {% endblock %}
-{% block javascriptfile %}{{ url_for('static', filename='js/chart.js') }}{% endblock %}
+
+{% block stylefile %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/history.css') }}">
+{% endblock %}
+
+{% block javascriptfile %}
+{{ url_for('static', filename='js/chart.js') }}
+{% endblock %}
+
 {% block content %}
-
-
-
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Stock History</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="static/js/history.js"></script>
-</head>
-<body>
-    <h1>Stock Price Over Time</h1>
+<div class="history_page">
+    <h1>View Historical Closing Price</h1>
 
     <!-- Input to choose ticker -->
-    <label for="tickerInput">Enter Ticker Symbol:</label>
-    <input type="text" id="tickerInput" placeholder="e.g. AAPL">
-    <button onclick="loadStockHistory()">Load Stock</button>
-    <br><br>
+    <div class="search-container">
+        <label for="tickerInput">Choose Stock:</label>
+        <input list="stock-options" id="tickerInput" name="tickerInput" placeholder="Enter ticker symbol" />
+        <datalist id="stock-options">
+            {% for stock in stocks %}
+                <option value="{{ stock.Symbol }}">{{ stock.Name }} ({{ stock.sector }}, {{ stock.country }})</option>
+            {% endfor %}
+        </datalist>
 
-    <!-- Mode selection (means time interval) -->
-    <label>Select Mode:</label><br>
+        <button onclick="loadStockHistory()">Load History</button>
+        <br><br>
 
-    <input type="radio" id="mode-d" name="mode" value="d">
-    <label for="mode-d">1 day</label><br>
+        <!-- Mode selection (means time interval) -->
+        <label>Time Range:</label><br>
 
-    <input type="radio" id="mode-w" name="mode" value="w">
-    <label for="mode-w">1 week</label><br>
+        <input type="radio" id="mode-d" name="mode" value="d">
+        <label for="mode-d">1 Day</label><br>
 
-    <input type="radio" id="mode-m" name="mode" value="m">
-    <label for="mode-m">1 month</label>
-    <br><br>
+        <input type="radio" id="mode-w" name="mode" value="w">
+        <label for="mode-w">1 Week</label><br>
 
-    <canvas id="stockChart" width="600" height="300"></canvas>
+        <input type="radio" id="mode-m" name="mode" value="m">
+        <label for="mode-m">1 Month</label>
+        <br><br>
+    </div>
 
-    
-</body>
-</html>
+    <canvas id="stockChart" width="400" height="200"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/history.js') }}"></script>
+</div>
+{% endblock %}

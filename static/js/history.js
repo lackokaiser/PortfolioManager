@@ -42,6 +42,7 @@ function loadStockHistory() {
                 chart.destroy();
             }
 
+
             chart = new Chart(ctx, {
                 type: 'line',
                 data: {
@@ -59,7 +60,7 @@ function loadStockHistory() {
                     plugins: {
                         title: {
                             display: true,
-                            text: `Stock Price History for ${data.ticker} (${mode.toUpperCase()})`
+                            text: `Stock Price History for ${data.ticker}`
                         }
                     },
                     scales: {

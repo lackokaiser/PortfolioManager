@@ -34,7 +34,9 @@ def about():
 
 @app.route("/history")
 def history():
-    return render_template("history.html")
+    tickers_df = get_ticker_list()
+    stocks = json.loads(tickers_df.to_json(orient="records"))
+    return render_template("history.html", stocks=stocks)
 
 @app.route("/api/v1/stock/<ticker>/point")
 def get_point_data(ticker):
