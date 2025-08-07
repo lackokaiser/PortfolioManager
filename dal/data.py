@@ -11,7 +11,7 @@ class DatabaseAccess:
         self.dbConnection = mysql.connector.connect(
             host="localhost",
             user="root",
-            password="n3u3da!",
+            password="computer1",
             database="CSFoundations"
         )
         self.yFinance = financeInstance
@@ -132,7 +132,24 @@ class DatabaseAccess:
         
         return sell_price - sum_value
     
-    #wE NEED a function get all stock values at once- this is inefficient
+    def get_all_owned_stock_value(self):
+        """
+        Returns the current value of all stocks you own
+        """
+        curs = self.dbConnection.cursor()
+        
+        curs.execute(f"select ticker, sum(quantity) from stockdemo group by ticker")
+        data = curs.fetchall()
+        curs.close()
+        
+        res = []
+        for item in data:
+            currentPrice = self._get_value(item[0])
+            res.append((item[0], currentPrice * item[1]))
+        
+        return res
+            
+        
     def get_owned_stock_value(self, ticker):
         """
         Returns the current value of your stock on the market
@@ -161,15 +178,16 @@ class DatabaseAccess:
     def get_owned_tickers(self):
         curs = self.dbConnection.cursor()
         
-        curs.execute("select distinct ticker from stockdemo")
+        curs.execute("select distinct ticker, sum(quantity) from stockdemo group by ticker")
         
         data = curs.fetchall()
         curs.close()
         
-        res = [item[0] for item in data if self.get_stock_amount(item[0]) > 0]
+        res = [item[0] for item in data if item[1] > 0]
         
         return res
     
+<<<<<<< HEAD
     def get_transaction_history(self, start_date: str = None, end_date: str = None) -> pd.DataFrame:
         """
         Get transaction history from database and return as DataFrame
@@ -234,6 +252,17 @@ class DatabaseAccess:
             result[ticker] = ticker_series.cumsum()
         
         return result
+=======
+    def get_owned_stock_raw(self, ticker):
+        curs = self.dbConnection.cursor()
+        curs.execute("SELECT * FROM stockdemo WHERE ticker = %s", (ticker,))
+        data = curs.fetchall()
+        curs.close()
+        
+        return data
+
+    
+>>>>>>> 04a6aaa9e1a30508525d270ed27f4ae76fc495f8
     
     
     def __del__(self):

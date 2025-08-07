@@ -56,6 +56,39 @@ Portfolio Management
     </table>
 </section>
 
+<!-- Load Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+<!-- Portfolio Performance Section -->
+<div style="text-align: left;">
+    <section class="grid" id="portfolio-growth-section">
+        <h1>Track Your Portfolio Growth</h1>
+        <i>This chart shows how the total value of your portfolio has changed over time - based on daily closing price and your total shares</i>
+        <br></br>
+
+        <!-- Time Range -->
+        <div class="mode-selector">
+            <label>Select a time range to view performance:</label><br>
+
+            <input type="radio" id="mode-d" name="mode" value="d">
+            <label for="mode-d">Past Day</label><br>
+
+            <input type="radio" id="mode-w" name="mode" value="w">
+            <label for="mode-w">Past Week</label><br>
+
+            <input type="radio" id="mode-m" name="mode" value="m">
+            <label for="mode-m">Past Month</label><br>
+
+            <input type="radio" id="mode-y" name="mode" value="y">
+            <label for="mode-y">Past Year</label><br><br>
+
+            <button class="styled" onclick="loadPortfolioPerformance()">Generate Performance Chart</button>
+        </div>
+
+        <!-- Canvas for the chart -->
+        <canvas id="portfolioChart" width="600" height="300"></canvas>
+    </section>
 </div>
 
 {% endblock %}

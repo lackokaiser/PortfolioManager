@@ -6,6 +6,7 @@
     <title>{% block title %}Portfolio Manager{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src={% block javascriptfile %}{% endblock %}></script>
+    {% block stylefile %}{% endblock %}
 </head>
 <body>
     <header>
@@ -18,6 +19,8 @@
                 <ul>
                     <li><a href="/portfolio">My Portfolio</a></li>
                     <li><a href="/market">Market View</a></li>
+                    <li><a href="/history">Stock History</a></li>
+                    <li><a href="/home">About</a></li>
                 </ul>
             </nav>
         </div>
