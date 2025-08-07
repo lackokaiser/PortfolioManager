@@ -58,32 +58,31 @@ class DatabaseAccess:
             
         return res        
         
-    def sell_stock(self, ticker, amount, name="") -> bool:
+    def sell_stock(self, ticker, amount, name="") -> dict:
         """
         Performs a sell operation on the given ticker.
         
         Returns False if there are not enough stocks owned or is an invalid ticker name
         """
-        # We need more descriptive errors
         if self.get_stock_amount(ticker) < amount:
-            return False
-        
+            return {'result': False, 'reason': "You don't own enough of this stock"}
+        # We need name? COnsistency of databse entries\
         return self.buy_stock(ticker, amount * -1, name=name)
         
-    def buy_stock(self, ticker: str, amount: float, name="") -> bool:
+    def buy_stock(self, ticker: str, amount: float, name="") -> dict:
         """
         Perform a buy operation on the given ticker
         
         Returns False if the ticker is invalid
         """
         if not self.yFinance.is_ticker_valid(ticker):
-            return False
+            return {'result': False, 'reason': "This ticker does not exists"}
         curs = self.dbConnection.cursor()
-        
+        # There is a problem with the database schema, we need to store the stock name- it is not bein stored
         curs.execute(f"insert into stockdemo (ticker, stock_name, stock_value, quantity) values ('{self._sanitize_value(ticker)}', '{self._sanitize_value(name)}', {self._get_value(ticker)}, {amount})")
         self.dbConnection.commit()
         curs.close()
-        return True
+        return {'result': True, 'reason': "Success"}
     
     def _get_value(self, ticker) -> float:
         """
@@ -131,7 +130,24 @@ class DatabaseAccess:
         
         return sell_price - sum_value
     
-    #wE NEED a function get all stock values at once- this is inefficient
+    def get_all_owned_stock_value(self):
+        """
+        Returns the current value of all stocks you own
+        """
+        curs = self.dbConnection.cursor()
+        
+        curs.execute(f"select ticker, sum(quantity) from stockdemo group by ticker")
+        data = curs.fetchall()
+        curs.close()
+        
+        res = []
+        for item in data:
+            currentPrice = self._get_value(item[0])
+            res.append((item[0], currentPrice * item[1]))
+        
+        return res
+            
+        
     def get_owned_stock_value(self, ticker):
         """
         Returns the current value of your stock on the market

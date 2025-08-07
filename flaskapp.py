@@ -38,22 +38,21 @@ def history():
     stocks = json.loads(tickers_df.to_json(orient="records"))
     return render_template("history.html", stocks=stocks)
 
+@functools.lru_cache(maxsize=128)  
 @app.route("/api/v1/stock/<ticker>/point")
 def get_point_data(ticker):
     return jsonify([{ticker: finance_api.get_current_value(ticker)}])
 
+@functools.lru_cache(maxsize=128)  
 @app.route("/api/v1/stock/feed")
-@app.route("/api/v1/stock/feed/<ticker>")
-def load_feed(ticker = None):
+def load_feed():
     """
     Should return a sorted list of stocks containing our own tracked items as well
     
     Order should be based on: Owned stocks, stock price growth
     """
     owned_tickers = database.get_owned_tickers()
-    tickers = [item for item in owned_tickers] 
-    if ticker:
-        tickers.append(ticker.upper())
+    tickers = [item for item in owned_tickers]
 
     tickers = list(set(tickers))  
     feed_data = finance_api.get_feed(tickers)
@@ -61,20 +60,28 @@ def load_feed(ticker = None):
     feed_data.sort(key=lambda x: (x["ticker"] not in owned_tickers, -x["growth"]))
     
     pnl_dict = database.get_all_stock_pnl()
+    owned = database.get_owned_stock()
     
     def sum_count(transactions):
         res = 0.0
         for item in transactions:
             res = res + item[1]
         return res
+
+    def find_tuple(owned, ticker):
+        for item in owned:
+            if item[0] == ticker:
+                return item
+        return None
     result = []
     for item in feed_data:
-        owned_stock = database.get_owned_stock(item['ticker'])
+        owned_stock = find_tuple(owned, item['ticker'])
         result.append(FeedItem(item['ticker'], item['name'], item['price'],
-                       owned_stock[0][2], pnl_dict[item['ticker']], item['price'] * sum_count(owned_stock[0][2])))
+                       owned_stock[2], pnl_dict[item['ticker']], item['price'] * sum_count(owned_stock[2])))
 
     return jsonify(result)
    
+@functools.lru_cache(maxsize=128)  
 @app.route("/api/v1/stock/<ticker>/history/<mode>")
 @app.route("/api/v1/stock/<ticker>/history")
 def get_history(ticker, mode='w'):
