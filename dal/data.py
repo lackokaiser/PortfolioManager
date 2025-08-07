@@ -66,7 +66,7 @@ class DatabaseAccess:
         """
         if self.get_stock_amount(ticker) < amount:
             return {'result': False, 'reason': "You don't own enough of this stock"}
-        
+        # We need name? COnsistency of databse entries\
         return self.buy_stock(ticker, amount * -1, name=name)
         
     def buy_stock(self, ticker: str, amount: float, name="") -> dict:
@@ -78,7 +78,7 @@ class DatabaseAccess:
         if not self.yFinance.is_ticker_valid(ticker):
             return {'result': False, 'reason': "This ticker does not exists"}
         curs = self.dbConnection.cursor()
-        
+        # There is a problem with the database schema, we need to store the stock name- it is not bein stored
         curs.execute(f"insert into stockdemo (ticker, stock_name, stock_value, quantity) values ('{self._sanitize_value(ticker)}', '{self._sanitize_value(name)}', {self._get_value(ticker)}, {amount})")
         self.dbConnection.commit()
         curs.close()
