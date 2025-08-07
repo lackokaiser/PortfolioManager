@@ -36,10 +36,12 @@ def about():
 def history():
     return render_template("history.html")
 
+@functools.lru_cache(maxsize=128)  
 @app.route("/api/v1/stock/<ticker>/point")
 def get_point_data(ticker):
     return jsonify([{ticker: finance_api.get_current_value(ticker)}])
 
+@functools.lru_cache(maxsize=128)  
 @app.route("/api/v1/stock/feed")
 @app.route("/api/v1/stock/feed/<ticker>")
 def load_feed(ticker = None):
@@ -73,6 +75,7 @@ def load_feed(ticker = None):
 
     return jsonify(result)
    
+@functools.lru_cache(maxsize=128)  
 @app.route("/api/v1/stock/<ticker>/history/<mode>")
 @app.route("/api/v1/stock/<ticker>/history")
 def get_history(ticker, mode='w'):

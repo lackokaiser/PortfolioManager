@@ -67,7 +67,7 @@ class DatabaseAccess:
         # We need more descriptive errors
         if self.get_stock_amount(ticker) < amount:
             return False
-        
+        # Name should always be stored
         return self.buy_stock(ticker, amount * -1, name=name)
         
     def buy_stock(self, ticker: str, amount: float, name="") -> bool:
@@ -79,7 +79,7 @@ class DatabaseAccess:
         if not self.yFinance.is_ticker_valid(ticker):
             return False
         curs = self.dbConnection.cursor()
-        
+        # There is a problem with the database schema, we need to store the stock name- it is not bein stored
         curs.execute(f"insert into stockdemo (ticker, stock_name, stock_value, quantity) values ('{self._sanitize_value(ticker)}', '{self._sanitize_value(name)}', {self._get_value(ticker)}, {amount})")
         self.dbConnection.commit()
         curs.close()
