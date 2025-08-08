@@ -11,7 +11,7 @@ class FinanceAPI:
         
         # Download all data at once instead of individual calls
         try:
-            hist_data = stocks.download(period="2d", auto_adjust=True)
+            hist_data = stocks.download(period="1d", auto_adjust=True)
             current_prices = hist_data['Close'].iloc[-1] if len(hist_data) > 0 else {}
             previous_prices = hist_data['Close'].iloc[-2] if len(hist_data) > 1 else {}
         except:
@@ -29,14 +29,14 @@ class FinanceAPI:
                 if previous == 0:
                     previous = current
                     
-                growth = (current - previous) / previous if previous != 0 else 0
+                # growth = (current - previous) / previous if previous != 0 else 0
 
                 data.append({
                     "ticker": ticker,
                     "name": info.get("shortName", ticker),
                     "price": float(current),
                     "previous_close": float(previous),
-                    "growth": float(growth)
+                    "growth": 0.0
                 })
             except Exception as e:
                 print(f"Error getting data for {ticker}: {e}")
