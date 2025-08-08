@@ -1,25 +1,64 @@
+
 let chart;
 
 async function fetchStocks() {
-    const response = fetchPortfolio(); // Fetch portfolio data first
     try {
-        const response = await fetch('/api/v1/stock/feed'); // Call the API endpoint
-        const passwords = await response.json(); // Parse the JSON response
         const tableBody = document.getElementById('portfolio-table-body');
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Loading...</td></tr>';
+
+        const response = await fetch('/api/v1/stock/feed');
+        const portfolioData = await response.json();
 
         tableBody.innerHTML = '';
 
-        // Populate the table with data
-        passwords.forEach(password => {
-            console.log(password)
+        // Use DocumentFragment for better performance when adding multiple elements
+        const fragment = document.createDocumentFragment();
+        
+        portfolioData.forEach(stock => {
             const row = document.createElement('tr');
-            row.innerHTML = `<td>${password.name}</td><td>${password.ticker}</td><td>${password.currentValue}</td><td>${password.volumeCount}</td>
-           <td> <input class="sell-input" type="decimal" id="sellQuantity-${password.ticker}" name="sellQuantity" min="0" max='${password.volumeCount}' />
-             <button class="sell-styled" type="button" onclick="sellStock('${password.ticker}', document.getElementById('sellQuantity-${password.ticker}').value)">Sell</button></td>`;
-            tableBody.appendChild(row);
+            
+            // Determine PnL arrow and color
+            const pnlValue = parseFloat(stock.pnl);
+            let pnlDisplay = '';
+            let pnlClass = '';
+            
+            if (pnlValue > 0) {
+                pnlDisplay = `▲ $${pnlValue.toFixed(2)}`;
+                pnlClass = 'pnl-positive';
+            } else if (pnlValue < 0) {
+                pnlDisplay = `▼ $${Math.abs(pnlValue).toFixed(2)}`;
+                pnlClass = 'pnl-negative';
+            } else {
+                pnlDisplay = `— $0.00`;
+                pnlClass = 'pnl-neutral';
+            }
+            
+            row.innerHTML = `
+                <td>${stock.name}</td>
+                <td>${stock.ticker}</td>
+                <td>$${stock.currentValue.toFixed(2)}</td>
+                <td>${stock.volumeCount}</td>
+                <td class="${pnlClass}">${pnlDisplay}</td>
+                <td>
+                    <input class="sell-input" type="number" 
+                           id="sellQuantity-${stock.ticker}" 
+                           name="sellQuantity" 
+                           min="0" 
+                           max="${stock.volumeCount}" 
+                           step="0.001" />
+                    <button class="sell-styled" type="button" 
+                            onclick="sellStock('${stock.ticker}', document.getElementById('sellQuantity-${stock.ticker}').value)">
+                        Sell
+                    </button>
+                </td>`;
+            fragment.appendChild(row);
         });
+        
+        tableBody.appendChild(fragment);
     } catch (error) {
-        console.error('Error fetching passwords:', error);
+        console.error('Error fetching Stock Data:', error);
+        const tableBody = document.getElementById('portfolio-table-body');
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error loading data</td></tr>';
     }
 }
 
@@ -38,7 +77,7 @@ async function sellStock(ticker,amount) {
 }
 
 async function searchStocks() {
-    const ticker = document.getElementById('stock-search').value.toUpperCase();
+    const ticker = document.getElementById('stock-search').value.trim().toUpperCase();
     console.log(ticker);
     if (!ticker || !validateInput(ticker)) {
         alert('Please enter a valid ticker symbol');
@@ -111,8 +150,14 @@ function loadPortfolioPerformance() {
             return response.json();
         })
         .then(data => {
-            // const history = data.history;
-            const dates = data.map(point => point.Date);
+            const dates = data.map(point => {
+                const date = new Date(point.Date);
+                return date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                    year: mode === 'year' ? 'numeric' : undefined 
+                });
+            });
             const values = data.map(point => point.Value);
 
             if (chart) {
@@ -150,7 +195,7 @@ function loadPortfolioPerformance() {
                         x: {
                             title: {
                                 display: true,
-                                text: 'Date'
+                                text: 'Date',
                             }
                         }
                     }

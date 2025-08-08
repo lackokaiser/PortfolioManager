@@ -174,7 +174,9 @@ class DatabaseAccess:
         curs.close()
         
         return data[0][0]
-        
+    
+    # Add cache to this method since tickers don't change frequently
+    @functools.lru_cache(maxsize=64)    
     def get_owned_tickers(self):
         curs = self.dbConnection.cursor()
         
@@ -185,7 +187,7 @@ class DatabaseAccess:
         
         res = [item[0] for item in data if item[1] > 0]
         
-        return res
+        return tuple(res)
     
     def get_transaction_history(self, start_date: str = None, end_date: str = None) -> pd.DataFrame:
         """
