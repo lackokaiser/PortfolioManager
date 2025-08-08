@@ -41,7 +41,8 @@ function loadStockHistory() {
                     month: 'short', 
                     day: 'numeric',
                 });
-            });            const prices = history.map(point => point.Close);
+            });            
+            const prices = history.map(point => point.Close);
 
             if (chart) {
                 chart.destroy();

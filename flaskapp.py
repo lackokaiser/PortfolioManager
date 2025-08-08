@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request
 from dal.data import DatabaseAccess
+import time
 import json
 import yfinance as yf
 import pandas as pd
@@ -21,7 +22,9 @@ def get_ticker_list():
 @app.route("/home")
 @app.route("/market")
 def market():
-    return render_template("market_view.html")    
+    tickers_df = get_ticker_list()
+    stocks = json.loads(tickers_df.to_json(orient="records"))
+    return render_template("market_view.html", stocks=stocks)    
 
 
 @app.route("/portfolio")
@@ -36,12 +39,12 @@ def history():
     stocks = json.loads(tickers_df.to_json(orient="records"))
     return render_template("history.html", stocks=stocks)
 
-@functools.lru_cache(maxsize=128)  
+ 
 @app.route("/api/v1/stock/<ticker>/point")
 def get_point_data(ticker):
     return jsonify([{ticker: finance_api.get_current_value(ticker)}])
 
-@functools.lru_cache(maxsize=128)  
+ 
 @app.route("/api/v1/stock/feed")
 def load_feed():
     """
@@ -49,10 +52,12 @@ def load_feed():
     
     Order should be based on: Owned stocks, stock price growth
     """
+    s = time.process_time()
     owned_tickers = database.get_owned_tickers()
     if not owned_tickers:
         return jsonify([])
     
+    print("Time to get owned tickers is", time.process_time()-s)
     tickers = list(set(owned_tickers))  # Remove duplicates efficiently
     feed_data = finance_api.get_feed(tickers)
     
@@ -126,6 +131,7 @@ def stock_data(symbol,period):
     hist = ticker.history(period=period)
     return jsonify(hist.reset_index().to_dict(orient="records"))
 
+# @functools.lru_cache(maxsize=32)
 @app.route("/api/v1/portfolio/performance/<mode>")
 def get_portfolio_performance(mode):
     period_map = {
@@ -141,7 +147,7 @@ def get_portfolio_performance(mode):
     Returns the current portfolio performance
     """
     try:
-        owned_tickers =  database.get_owned_tickers()
+        owned_tickers =  list(database.get_owned_tickers())
         stocks = yf.Tickers(owned_tickers).download(period=period, auto_adjust=True)
         day_performance = stocks.Close
         df = database.get_transaction_history()

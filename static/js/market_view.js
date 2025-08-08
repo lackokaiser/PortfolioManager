@@ -30,7 +30,13 @@ async function getStockData() {
         section.appendChild(canvas);
 
         const ctx = canvas.getContext("2d");
-        const labels = data.map(row => row.Date);
+        const labels = data.map(point => {
+            const date = new Date(point.Date);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+            });
+        });            
         const priceChanges = data.map((row, i) => {
             if (i === 0) return 0;
             return +(row.Close - data[i-1].Close).toFixed(2);

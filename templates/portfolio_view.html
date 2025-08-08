@@ -39,9 +39,11 @@ Portfolio Management
         <div class="search-container">
             <input list="stock-options" id="stock-search" name="stock-search" placeholder="Enter ticker symbol" />
             <datalist id="stock-options">
+                <select name = stocks size = 8>
                 {% for stock in stocks %}
                     <option value="{{ stock.Symbol }}">{{ stock.Name }} ({{ stock.sector }}) ( {{ stock.country }})</option>
                 {% endfor %}
+                </select>
             </datalist>
             <button class="styled" id="search-button" type="button" onclick="searchStocks()">Search</button>
         </div>
