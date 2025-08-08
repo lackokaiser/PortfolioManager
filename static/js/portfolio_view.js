@@ -1,6 +1,7 @@
 let chart;
 
 async function fetchStocks() {
+    const response = fetchPortfolio(); // Fetch portfolio data first
     try {
         const response = await fetch('/api/v1/stock/feed'); // Call the API endpoint
         const passwords = await response.json(); // Parse the JSON response
@@ -88,7 +89,6 @@ function validateInput(input) {
     else return true;
 }
 
-
 // Fetch passwords when the page loads
 window.onload = fetchStocks;
 
@@ -111,9 +111,9 @@ function loadPortfolioPerformance() {
             return response.json();
         })
         .then(data => {
-            const history = data.history;
-            const dates = history.map(point => point.Date);
-            const values = history.map(point => point.Value);
+            // const history = data.history;
+            const dates = data.map(point => point.Date);
+            const values = data.map(point => point.Value);
 
             if (chart) {
                 chart.destroy();

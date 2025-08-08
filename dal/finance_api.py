@@ -1,7 +1,7 @@
 import yfinance as yf
 
 class FinanceAPI:
-    def get_feed(self, tickers):
+    def get_feed(self, tickers, close=False):
         data = []
         stocks = yf.Tickers(tickers)
         for ticker in tickers:

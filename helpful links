@@ -16,6 +16,14 @@ Think about caching the point data about stocks
 
 Store list of all tickers upon loadup
 
+Cleanup:
+
+ROunding formatting in portfolio view
+
+Loading bar whn table is coming up
+
+https://www.w3schools.com/howto/howto_css_loader.asp
+
 {% comment %} <style>
 
         h1{

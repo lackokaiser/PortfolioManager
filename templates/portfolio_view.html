@@ -5,6 +5,13 @@ Portfolio Management
 {% block javascriptfile %}{{ url_for('static', filename='js/portfolio_view.js') }}{% endblock %}
 {% block content %}
 <div class="container">
+    <section class="grid" id="portfolio-view">
+        <h1>Portfolio Overview</h1>
+        <div id="portfolio-chart" class="chart-container">
+            <!-- Chart will be rendered here -->
+            <canvas id="myChart"></canvas>
+        </div>
+    </section>
     <section class="grid" id="stock-picker">
         <h1>Stock Picker</h1>
         <div class="search-container">
