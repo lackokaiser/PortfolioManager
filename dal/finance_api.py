@@ -48,11 +48,8 @@ class FinanceAPI:
             return 0.0
         return history["Close"].iloc[-1]
     
-<<<<<<< HEAD
-=======
     
 
->>>>>>> 04a6aaa9e1a30508525d270ed27f4ae76fc495f8
 if __name__ == "__main__":
     fin = FinanceAPI()
     

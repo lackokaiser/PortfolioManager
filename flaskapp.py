@@ -110,8 +110,56 @@ def buy_stock(ticker, amount):
 def sell_stock(ticker, amount):
     return jsonify(database.sell_stock(ticker, amount))
 
-@app.route("/api/v1/portfolio/performance/<mode>", methods=["GET"])
-def portfolio_performance(mode):
+# @app.route("/api/v1/portfolio/performance/<mode>", methods=["GET"])
+# def portfolio_performance(mode):
+#     period_map = {
+#         'd': '1d',
+#         'w': '1wk',
+#         'm': '1mo',
+#         'y':'1y'
+#     }
+
+#     period = period_map.get(mode, '1wk')
+
+#     tickers = database.get_owned_tickers()  
+#     portfolio_history = {}
+
+#     for ticker in tickers:
+#         records = database.get_owned_stock_raw(ticker)
+
+#         print(f"DEBUG: Raw records for {ticker} → {records}")
+
+#         if not records:
+#             continue
+
+#         # Sum up all quantities for ticker
+#         quantity = sum(row[4] for row in records) 
+
+#         # Get historical prices 
+#         history = finance_api.get_history(ticker, period)
+
+#         for point in history:
+#             date = point['Date']
+#             value = round(point['Close'] * quantity, 2)
+
+#             if date not in portfolio_history:
+#                 portfolio_history[date] = 0
+#             portfolio_history[date] += value
+
+#     # Sort by date 
+#     sorted_history = [
+#         {"Date": date, "Value": round(value, 2)}
+#         for date, value in sorted(portfolio_history.items())
+#     ]
+
+#     return jsonify({"history": sorted_history})
+
+
+
+
+
+@app.route("/api/v1/portfolio/performance/<mode>")
+def get_portfolio_performance(mode):
     period_map = {
         'd': '1d',
         'w': '1wk',
@@ -121,61 +169,26 @@ def portfolio_performance(mode):
 
     period = period_map.get(mode, '1wk')
 
-    tickers = database.get_owned_tickers()  
-    portfolio_history = {}
-
-    for ticker in tickers:
-        records = database.get_owned_stock_raw(ticker)
-
-        print(f"DEBUG: Raw records for {ticker} → {records}")
-
-        if not records:
-            continue
-
-        # Sum up all quantities for ticker
-        quantity = sum(row[4] for row in records) 
-
-        # Get historical prices 
-        history = finance_api.get_history(ticker, period)
-
-        for point in history:
-            date = point['Date']
-            value = round(point['Close'] * quantity, 2)
-
-            if date not in portfolio_history:
-                portfolio_history[date] = 0
-            portfolio_history[date] += value
-
-    # Sort by date 
-    sorted_history = [
-        {"Date": date, "Value": round(value, 2)}
-        for date, value in sorted(portfolio_history.items())
-    ]
-
-    return jsonify({"history": sorted_history})
-
-
-
-
-
-@app.route("/api/v1/portfolio")
-def get_portfolio_performance():
     """
     Returns the current portfolio performance
     """
     try:
-        owned_tickers = database.get_owned_tickers()
-        stocks = yf.Tickers(owned_tickers).download(period='1wk', auto_adjust=True)
+        owned_tickers =  database.get_owned_tickers()
+        stocks = yf.Tickers(owned_tickers).download(period=period, auto_adjust=True)
         day_performance = stocks.Close
         df = database.get_transaction_history()
         cumulative_holdings = database.calculate_cumulative_holdings(df)
         cumulative_valuation = cumulative_holdings.multiply(day_performance, axis=0,fill_value=1).sum(axis=1)
-        cumulative_valuation.columns = ['Date', 'Cumulative Valuation']
-        print(f"Cumulative valuation: {json.dumps(cumulative_valuation)}")
-        return jsonify(cumulative_valuation.to_dict(orient='records'))
+        # Convert to DataFrame and reset index to make date a column
+        cumulative_valuation = cumulative_valuation.to_frame(name='Value')
+        cumulative_valuation.reset_index(inplace=True)
+        cumulative_valuation.columns = ['Date', 'Value']
+        
+        return jsonify(cumulative_valuation.to_dict('records'))
     except Exception as e:
         print(f"Error fetching portfolio: {e}")
         return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0")
