@@ -2,6 +2,7 @@
 {% block title %}
 Portfolio Management
 {% endblock %}
+
 {% block javascriptfile %}{{ url_for('static', filename='js/portfolio_view.js') }}{% endblock %}
 {% block content %}
 <div class="page">
@@ -86,5 +87,30 @@ Portfolio Management
 
 
 </div>
+<!-- Include Toastr CSS and JS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<script>
+    // Configure Toastr options
+    toastr.options = {
+        "closeButton": true,
+        "debug": false,
+        "newestOnTop": true,
+        "progressBar": true,
+        "positionClass": "toast-top-right",
+        "preventDuplicates": false,
+        "onclick": null,
+        "showDuration": "300",
+        "hideDuration": "1000",
+        "timeOut": "3000",
+        "extendedTimeOut": "1000",
+        "showEasing": "swing",
+        "hideEasing": "linear",
+        "showMethod": "fadeIn",
+        "hideMethod": "fadeOut"
+    };
+</script>
 {% endblock %}

@@ -174,9 +174,7 @@ class DatabaseAccess:
         curs.close()
         
         return data[0][0]
-    
-    # Add cache to this method since tickers don't change frequently
-    @functools.lru_cache(maxsize=64)    
+      
     def get_owned_tickers(self):
         curs = self.dbConnection.cursor()
         

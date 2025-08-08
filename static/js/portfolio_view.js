@@ -59,6 +59,7 @@ async function fetchStocks() {
         console.error('Error fetching Stock Data:', error);
         const tableBody = document.getElementById('portfolio-table-body');
         tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: red;">Error loading data</td></tr>';
+        toastr.error('Failed to load portfolio data. Please try again.', 'Error');
     }
 }
 
@@ -67,12 +68,14 @@ async function sellStock(ticker,amount) {
         const response = await fetch(`/api/v1/stock/${ticker}/sell/${amount}`);
         if (response.ok) {
             console.log(`Successfully sold ${amount} of stock with ticker: ${ticker}`);
+            toastr.success(`Successfully sold ${amount} shares of ${ticker}`, 'Sale Complete');
             fetchStocks();
         } else {
             console.error('Error selling stock:', response.statusText);
         }
     } catch (error) {
         console.error('Error selling stock:', error);
+        toastr.error(errorMessage, 'Sale Failed');
     }
 }
 
@@ -103,7 +106,7 @@ async function searchStocks() {
 
 function buyStock(ticker, amount) {
     if (!amount || isNaN(amount) || amount <= 0) {
-        alert('Please enter a valid amount to buy');
+        toastr.warning('Please enter a valid amount to buy', 'Invalid Input');
         return;
     }
     fetch(`/api/v1/stock/${ticker}/buy/${amount}`)
@@ -111,12 +114,18 @@ function buyStock(ticker, amount) {
         if (response.ok) {
             console.log(`Successfully bought ${amount} of stock with ticker: ${ticker}`);
             fetchStocks();
+            const inputField = document.getElementById(`buyQuantity-${ticker}`);
+            if (inputField) {
+                inputField.value = '';
+            }
+            toastr.success(`Successfully bought ${amount} shares of ${ticker}`, 'Purchase Complete');
         } else {
             console.error('Error buying stock:', response.statusText);
         }
     })
     .catch(error => {
         console.error('Error buying stock:', error);
+        toastr.error('Network error occurred while buying stock', 'Connection Error');
     });
 }
 
@@ -201,6 +210,8 @@ function loadPortfolioPerformance() {
                     }
                 }
             });
+            toastr.info('Portfolio performance chart updated successfully', 'Chart Updated');
+
         })
         .catch(error => {
             console.error("Error fetching portfolio performance data:", error);

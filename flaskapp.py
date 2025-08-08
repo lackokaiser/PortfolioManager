@@ -52,19 +52,15 @@ def load_feed():
     
     Order should be based on: Owned stocks, stock price growth
     """
-    s = time.process_time()
     owned_tickers = database.get_owned_tickers()
     if not owned_tickers:
         return jsonify([])
-    owned_ticker_time = time.process_time()-s
     tickers = list(set(owned_tickers))  # Remove duplicates efficiently
     feed_data = finance_api.get_feed(tickers)
-    feed_data_time = time.process_time() - s - owned_ticker_time
     feed_data.sort(key=lambda x: (x["ticker"] not in owned_tickers, -x["growth"]))
     
     pnl_dict = database.get_all_stock_pnl()
     owned = database.get_owned_stock()
-    pnl_and_owned_time = time.process_time() - s - feed_data_time - owned_ticker_time
     owned_lookup = {item[0]: item for item in owned}
     
 
@@ -72,7 +68,6 @@ def load_feed():
     volume_lookup = {}
     for ticker, name, transactions in owned:
         volume_lookup[ticker] = sum(float(transaction[1]) for transaction in transactions)
-    lookup_time = time.process_time() - s - pnl_and_owned_time - feed_data_time - owned_ticker_time
     result = []
     for item in feed_data:
         ticker = item['ticker']
@@ -88,13 +83,6 @@ def load_feed():
                 pnl_dict[ticker], 
                 item['price'] * total_volume
             ))
-    for_loop_time = time.process_time() - s - lookup_time - pnl_and_owned_time - feed_data_time - owned_ticker_time
-    print("Time to load feed: ",
-          f"Owned tickers: {owned_ticker_time:.4f}s, ",
-          f"Feed data: {feed_data_time:.4f}s, ",
-          f"Owned and PnL: {pnl_and_owned_time:.4f}s, ",
-          f"Lookup: {lookup_time:.4f}s, ",
-          f"For loop: {for_loop_time:.4f}s, ")
     return jsonify(result)
    
 @functools.lru_cache(maxsize=128)  
