@@ -35,7 +35,13 @@ function loadStockHistory() {
             const history = data.history;
             console.log("Data received:", history);  
 
-            const dates = history.map(point => point.Date);
+            const dates = history.map(point => {
+                const date = new Date(point.Date);
+                return date.toLocaleDateString('en-US', { 
+                    month: 'short', 
+                    day: 'numeric',
+                });
+            });            
             const prices = history.map(point => point.Close);
 
             if (chart) {

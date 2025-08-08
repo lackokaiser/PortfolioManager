@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request
 from dal.data import DatabaseAccess
+import time
 import json
 import yfinance as yf
 import pandas as pd
@@ -17,13 +18,15 @@ def get_ticker_list():
     ticker_pd= pd.read_csv("static/assets/all_tickers.csv")
     return ticker_pd[['Symbol', 'Name', 'Sector', 'Country']].fillna('Unknown')
 
-
-@app.route("/market")
-def market():
-    return render_template("market_view.html")    
-
 @app.route("/")
 @app.route("/home")
+@app.route("/market")
+def market():
+    tickers_df = get_ticker_list()
+    stocks = json.loads(tickers_df.to_json(orient="records"))
+    return render_template("market_view.html", stocks=stocks)    
+
+
 @app.route("/portfolio")
 def about():
     tickers_df = get_ticker_list()
@@ -36,12 +39,12 @@ def history():
     stocks = json.loads(tickers_df.to_json(orient="records"))
     return render_template("history.html", stocks=stocks)
 
-@functools.lru_cache(maxsize=128)  
+ 
 @app.route("/api/v1/stock/<ticker>/point")
 def get_point_data(ticker):
     return jsonify([{ticker: finance_api.get_current_value(ticker)}])
 
-@functools.lru_cache(maxsize=128)  
+ 
 @app.route("/api/v1/stock/feed")
 def load_feed():
     """
@@ -49,10 +52,13 @@ def load_feed():
     
     Order should be based on: Owned stocks, stock price growth
     """
+    s = time.process_time()
     owned_tickers = database.get_owned_tickers()
-    tickers = [item for item in owned_tickers]
-
-    tickers = list(set(tickers))  
+    if not owned_tickers:
+        return jsonify([])
+    
+    print("Time to get owned tickers is", time.process_time()-s)
+    tickers = list(set(owned_tickers))  # Remove duplicates efficiently
     feed_data = finance_api.get_feed(tickers)
     
     feed_data.sort(key=lambda x: (x["ticker"] not in owned_tickers, -x["growth"]))
@@ -60,22 +66,29 @@ def load_feed():
     pnl_dict = database.get_all_stock_pnl()
     owned = database.get_owned_stock()
     
-    def sum_count(transactions):
-        res = 0.0
-        for item in transactions:
-            res = res + item[1]
-        return res
-
-    def find_tuple(owned, ticker):
-        for item in owned:
-            if item[0] == ticker:
-                return item
-        return None
+    # Create lookup dictionaries to replace O(n) linear searches with O(1) lookups
+    owned_lookup = {item[0]: item for item in owned}
+    
+    # Pre-calculate volumes for all stocks
+    volume_lookup = {}
+    for ticker, name, transactions in owned:
+        volume_lookup[ticker] = sum(float(transaction[1]) for transaction in transactions)
+    
     result = []
     for item in feed_data:
-        owned_stock = find_tuple(owned, item['ticker'])
-        result.append(FeedItem(item['ticker'], item['name'], item['price'],
-                       owned_stock[2], pnl_dict[item['ticker']], item['price'] * sum_count(owned_stock[2])))
+        ticker = item['ticker']
+        if ticker in owned_lookup:
+            owned_stock = owned_lookup[ticker]
+            total_volume = volume_lookup[ticker]
+            
+            result.append(FeedItem(
+                ticker, 
+                item['name'], 
+                item['price'],  # Use actual current price instead of 0
+                owned_stock[2], 
+                pnl_dict[ticker], 
+                item['price'] * total_volume
+            ))
 
     return jsonify(result)
    
@@ -110,54 +123,15 @@ def buy_stock(ticker, amount):
 def sell_stock(ticker, amount):
     return jsonify(database.sell_stock(ticker, amount))
 
-# @app.route("/api/v1/portfolio/performance/<mode>", methods=["GET"])
-# def portfolio_performance(mode):
-#     period_map = {
-#         'd': '1d',
-#         'w': '1wk',
-#         'm': '1mo',
-#         'y':'1y'
-#     }
 
-#     period = period_map.get(mode, '1wk')
+@app.route("/api/v1/stocks/<symbol>/<period>")
+def stock_data(symbol,period):
+    # period = request.args.get("period", "5d")
+    ticker = yf.Ticker(symbol)
+    hist = ticker.history(period=period)
+    return jsonify(hist.reset_index().to_dict(orient="records"))
 
-#     tickers = database.get_owned_tickers()  
-#     portfolio_history = {}
-
-#     for ticker in tickers:
-#         records = database.get_owned_stock_raw(ticker)
-
-#         print(f"DEBUG: Raw records for {ticker} → {records}")
-
-#         if not records:
-#             continue
-
-#         # Sum up all quantities for ticker
-#         quantity = sum(row[4] for row in records) 
-
-#         # Get historical prices 
-#         history = finance_api.get_history(ticker, period)
-
-#         for point in history:
-#             date = point['Date']
-#             value = round(point['Close'] * quantity, 2)
-
-#             if date not in portfolio_history:
-#                 portfolio_history[date] = 0
-#             portfolio_history[date] += value
-
-#     # Sort by date 
-#     sorted_history = [
-#         {"Date": date, "Value": round(value, 2)}
-#         for date, value in sorted(portfolio_history.items())
-#     ]
-
-#     return jsonify({"history": sorted_history})
-
-
-
-
-
+# @functools.lru_cache(maxsize=32)
 @app.route("/api/v1/portfolio/performance/<mode>")
 def get_portfolio_performance(mode):
     period_map = {
@@ -173,7 +147,7 @@ def get_portfolio_performance(mode):
     Returns the current portfolio performance
     """
     try:
-        owned_tickers =  database.get_owned_tickers()
+        owned_tickers =  list(database.get_owned_tickers())
         stocks = yf.Tickers(owned_tickers).download(period=period, auto_adjust=True)
         day_performance = stocks.Close
         df = database.get_transaction_history()

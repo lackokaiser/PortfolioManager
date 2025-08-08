@@ -1,207 +1,101 @@
+async function getStockData() {
+    const symbol = document.getElementById("symbol").value.trim().toUpperCase();
+    const period = document.getElementById("period").value;
 
-async function loadMarketData() {
+    if (!symbol) { 
+        alert("Please enter a stock symbol.");
+        return;
+    }
+
+    const resultDiv = document.getElementById("result");
+    resultDiv.innerHTML = ""; // Clear previous results
+
     try {
-        const response = await fetch(`https://finance.yahoo.com/most-active`);
-        const html = await response.text();
-        const tableBody = document.getElementById('portfolio-table-body');
-         if (!html) {
-               return res.status(404).json({ error: 'No data found' });
-          }       
-        tableBody.innerHTML = '';
- 
-        html.forEach(stock => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${stock.symbol}</td><td>${stock.name}</td>
-                <td>${stock.price}</td><td>${stock.change}</td>  
-                 <td>${stock.percentChange}</td><td>${stock.volume}</td>
-                 <td>${stock.avgVolume}</td><td>${stock.marketCap}</td>
-                 <td>${stock.peRatio}</td>
-            `;
-            tableBody.appendChild(row);
+        // Pass period as a query parameter
+        const response = await fetch(`/api/v1/stocks/${symbol}/${period}`);
+        if (!response.ok) throw new Error("Failed to fetch stock data.");
+        const data = await response.json();
+
+        if (!data || data.length === 0) {
+            resultDiv.textContent = "No data found.";
+            return;
+        }
+
+        const section = document.createElement("div");
+        section.className = "stock-section";
+
+        // Create Chart
+        const canvas = document.createElement("canvas");
+        canvas.id = `chart-${symbol}`;
+        section.appendChild(canvas);
+
+        const ctx = canvas.getContext("2d");
+        const labels = data.map(point => {
+            const date = new Date(point.Date);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+            });
+        });            
+        const priceChanges = data.map((row, i) => {
+            if (i === 0) return 0;
+            return +(row.Close - data[i-1].Close).toFixed(2);
         });
-    } catch (error) {   
-        console.error('Error fetching market data:', error);
-    } 
+
+        new Chart(ctx, {
+            type: "line",
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: `${symbol} Daily Price Change`,
+                    data: priceChanges,
+                    borderColor: "green",
+                    fill: false,
+                    tension: 0.1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: true } },
+                scales: {
+                    x: { title: { display: true, text: "Date" } },
+                    y: { title: { display: true, text: "Price Change (USD)" } }
+                }
+            }
+        });
+
+        // Create Table
+        const headers = Object.keys(data[0]);
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
+        const tbody = document.createElement("tbody");
+
+        const headerRow = document.createElement("tr");
+        headers.forEach(h => {
+            const th = document.createElement("th");
+            th.textContent = h;
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+
+        data.forEach(row => {
+            const tr = document.createElement("tr");
+            headers.forEach(h => {
+                const td = document.createElement("td");
+                const value = row[h];
+                td.textContent = typeof value === "number" ? value.toFixed(2) : value;
+                tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+
+        section.appendChild(table);
+        resultDiv.appendChild(section);
+
+    } catch (err) {
+        console.error(err);
+        resultDiv.textContent = `Error: ${err.message}`;
+    }
 }
-
-
-//     // function to fetch data from API and to generate table once selected 
-//     fetch('http://localhost:5000/api/data')
-//     .then(res => res.json())
-//     .then(data => console.log('GET response:', data));
-//         select.appendChild(option);
-
-
-
-
-// // default function to create table rows
-// function createRow(cells) {
-//     const tr = document.creatElement('tr')
-//         cells.forEach(cell => {
-//             const td = document.createElement('td'); 
-//                 if (typeof cell === 'string' || typeof cell === 'number') {
-//                            td.textContent = cell          
-//                              } else if (cell instanceof HTMLElement) {
-//                                        td.appendChild(cell);
-//                                         }      
-//                                         tr.appendChild(td);
-//                                     });
-//                                     return tr;
-//                                 }
-
-
-
-// // Buy/Sell 
-
-// function formatGainLoss(value) {
-//     const span = document.createElement('span');
-//     const formatted = '$${parseFloat(value).toFixed(2)}';
-//     span.textContent = formatted;
-//     span.style.color = value >= 0 ? 'green' : 'red';
-//     return span;
-// }
-
-
-// // function to load portfolio stock data 
-// async function loadPortfolio() {
-//     try {
-//         const response = await fetch('http://localhost:5000/api/v1/portfolio');
-//         const portfolio = await response.json();
-//         const tbody = document.querySelector('#portfolio-table tbody');
-//         tbody.inerHTML = ''; // clear existing rows
-        
-    
-//         portfolio.forEach(stock => {
-//             const gainLoss = ((stock.current_price - stock.avg_buy_price) * stock.shares).toFixed(2);
-//             const buyBtn = document.createElement('button');
-//             buyBtn.textContent = 'Buy';
-//             buyBtn.onclick = () => buyStock(stock.symbol, 1);
-            
-//             const sellBtn = document.createElement('button');
-//                 sellBtn.textContent = 'Sell';
-//                 sellBtn.onclick = () => sellStock(stock.symbol, 1);
-            
-//                 const rows = creatRow([
-//                     stock.symbol, 
-//                     stock.shares, 
-//                     '$${stock.avg_buy_price.toFixed(2)}',
-//                     '$${stock.current_price.toFixed(2)}',
-//                     formatGainLoss(gainLoss),
-//                     buyBtn, 
-//                     sellBtn
-//                 ]);
-//                 tbody.appendChild(row);
-//             });
-//         } catch (error) {
-//             console.error('Error loading portfolo;', error);
-//         }
-//     }
-
-// // function to load yahoo finance live market data
-// const express = require('express');
-// const cors = require('cors');
-
-// const app = express();
-// const PORT = 3000;
-
-// app.use(cors());
-
-// app.get('/stocks', async(requestAnimationFrame, res) => {
-//     try {
-//         const response = await fetch('https://finance.yahoo.com/markets/stocks/most-active/?start=0&count=200');
-//         const data = await response.json();
-//         res.json(data);
-//     } catch(error) {
-//         console.error('Error fetching data:', error);
-//         res.status(500).json({ error: 'Failed to fetch Stock data'});
-//     }
-// });
-
-// app.listen(PORT, () => {
-//     console.log(`Server running on http://localhost:$(PORT}`);
-// });
-
-
-// //async function fetchStockData() {
-//     //const options = {
-//         //method: 'GET',
-//         //headers: {
-//             //'X-RapidAPI-Key': '5fb181b2d1mshd76ac988484d044p1726b1jsn6c348d04422d',
-//             //'X-RapidAPI-Host': 'yh-finance.p.rapidapi.com',
-//         //}
-//     //};
-
-//     //try {
-//         //const response = await fetch('https://yhfinance.p.rapidapi.com/stock/v3/get-summary?symbol=AAPL', options);
-//         //const data = await response.json();
-
-//         //const price = data.price.regularMarketPrice.raw;
-//         //const currency = data.price.currency;
-//         //const name = data.price.longName;
-
-//         //document.getElementById("stockData").innerHTML = `
-//         //<h2>${name} (AAPL)</h2>
-//         //<p>Price: ${price} ${currency}</p>
-//         //`;
-
-//         //} catch (error) {
-//             //document.getElementById("stockData").textContent = "Error loading data";
-//             //console.error(error);
-//         //}
-    
-// //}
-// //getStockData();
-
-
-
-
-
-
-
-
-
-
-// // function to buy
-// async function buyStock(ticker, amount) {
-//     try {
-//         const res = await fetch('http://localhost:5000/api/v1/stock/${ticker}/buy/${amount}', {
-//             method: 'POST'
-// });
-
-// const result = await res.json();
-// console.log('Buy result:', result);
-// loadPortfolio();
-// } catch (error) {
-// console.error('Error buying stock:, error');
-// }
-// }
-
-// // function to sell 
-// async function sellStock(ticker, amount) {
-// try {
-//     const res = await fetch('http://localhost:5000/api/v1/stock/${ticker}/sell/${amount}', {
-//         method: 'POST'
-// });
-// const result = await res.json();
-// console.log('Sell result:', result);
-// loadPortfolio();
-// } catch(error) {
-//     console.error('Error selling stock:', error);
-// }
-// }
-
-// // load the page 
-// window.addEventListener('DOMContentLoaded', () => {
-//     loadPortfolio();
-//     loadMarketData();
-
-// // reset page ever 5 minutes 
-// setInterval(() => {
-//     loadPortfolio();
-//     loadMarketData();
-// },    5 * 60 *1000);
-// });
-
-
-window.onload = loadMarketData;

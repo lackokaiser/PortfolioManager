@@ -1,139 +1,154 @@
-{%  extends "layout.html"%}
-
-{% block title %}
-Portfolio Management
-{% endblock %}
-
-{% block stylefile %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-{% endblock %}
-
-
-{% block javascriptfile %}
-{{ url_for('static', filename='js/chart.js') }}
-{% endblock %}
-
-
-{% block content %}
-<div class="Market page">
-  <title>Stock Viewer with Time Range</title>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-  <h1>Market Overview</h1>
-
-  <input type="text" id="symbol" placeholder="Enter stock symbol" autofocus>
-
-  <select id="period">
-    <option value="5d">5 Days</option>
-    <option value="1mo">1 Month</option>
-    <option value="3mo">3 Months</option>
-    <option value="6mo">6 Months</option>
-  </select>
-
-  <div id="result"></div>
-  <table id="stocks-table">
-
-  <script>
-    document.getElementById("symbol").addEventListener("keydown", function(event) {
-      if(event.key === "Enter") {
-        getStockData();
-      }
-    });
-
-    async function getStockData() {
-      const symbol = document.getElementById("symbol").value.trim().toUpperCase();
-      const period = document.getElementById("period").value;
-
-      if (!symbol) {
-        alert("Please enter a stock symbol");
-        return;
-      }
-
-      const resultDiv = document.getElementById("result");
-      resultDiv.innerHTML = "";
-
-      try {
-        const response = await fetch(`/stock/${symbol}?period=${period}`);
-        if(!response.ok) throw new Error("Failed to fetch stock data.");
-        const data = await response.json();
-
-        if (!data || data.length === 0) {
-          resultDiv.textContent = "No data found.";
-          return;
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stock Viewer with Time Range</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
         }
 
-        const section = document.createElement("div");
-        section.className = "stock-section";
+        input, select, button {
+            padding: 8px;
+            font-size: 16px;
+            margin-right: 10px;
+        }
 
-        //Create Chart
-        const canvas = document.createElement("canvas");
-        canvas.id = `chart-${symbol}`;
-        section.appendChild(canvas);
+        .stock-section {
+            margin-top: 30px;
+        }
 
-        const ctx = canvas.getContext("2d");
-        const labels = data.map(row => row.Date);
-        const priceChanges = data.map((row, i) => {
-            if (i === 0) return 0;
-            return +(row.Close - data[i-1].Close).toFixed(2);
-        });
+        canvas {
+            max-width: 100%;
+            margin-bottom: 20px;
+        }
 
-        new Chart(ctx, {
-            type: "line", 
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: `${symbol} Daily Price Change`,
-                    data: priceChanges,
-                    borderColor: "green",
-                    fill: false,
-                    tension: 0.1
-                }]
-            },
-            options: {
-                responsive: true, 
-                plugins: {legend: {display: true } },
-                scales: {
-                    x: { title: { display: true, text: "Date" } },
-                    y: { title: { display: true, text: "Price Change (USD)"} }
-                }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: center;
+        }
+
+        th {
+            background: #f4f4f4;
+        }
+    </style>
+</head>
+<body>
+
+
+
+    <script>
+        document.getElementById("symbol").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                getStockData();
             }
+
         });
 
-        //Create table
-        const headers = Object.keys(data[0]);
-        const table = document.createElement("table");
-        const thead = document.createElement("thead");
-        const tbdoy = document.createElement("tbody");
+        async function getStockData() {
+            const symbol = document.getElementById("symbol").value.trim().toUpperCase();
+            const period = document.getElementById("period").value;
 
-        const headerRow = document.createElement("tr");
-        headers.forEach(h => {
-            const th = document.createElement("th");
-            th.textContent = h;
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
+            if (!symbol) { 
+                alert("Please enter a stock symbol.");
+                return;
+            }
 
-        data.forEach(row => {
-            const tr = document.createElement("tr");
-            headers.forEach(h => {
-                const td = document.createElement("td");
-                const value = row[h];
-                td.textContent = typeof value === "number" ? value.toFixed(2) : value;
-                tr.appendChild(td);
-            });
-            tbody.appendChild(tr);
-        });
-        table.appendChild(tbody);
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = ""; // Clear previous results
 
-        section.appendChild(table);
-        resultDiv.appendChild(section);
+            try {
+                // Pass period as a query parameter
+                const response = await fetch(`/api/v1/stocks/${symbol}/${period}`);
+                if (!response.ok) throw new Error("Failed to fetch stock data.");
+                const data = await response.json();
 
-      } catch (err) {
-        console.error(err);
-        resultDiv.textContent = `Error: ${err.message}`;
-      }
-}
-</script>
+                if (!data || data.length === 0) {
+                    resultDiv.textContent = "No data found.";
+                    return;
+                }
+
+                const section = document.createElement("div");
+                section.className = "stock-section";
+
+                // Create Chart
+                const canvas = document.createElement("canvas");
+                canvas.id = `chart-${symbol}`;
+                section.appendChild(canvas);
+
+                const ctx = canvas.getContext("2d");
+                const labels = data.map(row => row.Date);
+                const priceChanges = data.map((row, i) => {
+                    if (i === 0) return 0;
+                    return +(row.Close - data[i-1].Close).toFixed(2);
+                });
+
+                new Chart(ctx, {
+                    type: "line",
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: `${symbol} Daily Price Change`,
+                            data: priceChanges,
+                            borderColor: "green",
+                            fill: false,
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { display: true } },
+                        scales: {
+                            x: { title: { display: true, text: "Date" } },
+                            y: { title: { display: true, text: "Price Change (USD)" } }
+                        }
+                    }
+                });
+
+                // Create Table
+                const headers = Object.keys(data[0]);
+                const table = document.createElement("table");
+                const thead = document.createElement("thead");
+                const tbody = document.createElement("tbody");
+
+                const headerRow = document.createElement("tr");
+                headers.forEach(h => {
+                    const th = document.createElement("th");
+                    th.textContent = h;
+                    headerRow.appendChild(th);
+                });
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                data.forEach(row => {
+                    const tr = document.createElement("tr");
+                    headers.forEach(h => {
+                        const td = document.createElement("td");
+                        const value = row[h];
+                        td.textContent = typeof value === "number" ? value.toFixed(2) : value;
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+                table.appendChild(tbody);
+
+                section.appendChild(table);
+                resultDiv.appendChild(section);
+
+            } catch (err) {
+                console.error(err);
+                resultDiv.textContent = `Error: ${err.message}`;
+            }
+        }
+    </script>
+
 </body>
 </html>
